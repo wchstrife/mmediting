@@ -115,3 +115,7 @@ data/
 
 # Pytorch
 *.pth
+
+# wchstife
+result/
+
