@@ -113,12 +113,11 @@ def main():
             save_image=args.save_image)
 
     if rank == 0:
-        print('')
         # print metrics
         stats = dataset.evaluate(outputs)
         for stat in stats:
             print('Eval-{}: {}'.format(stat, stats[stat]))
-
+            
         # save result pickle
         if args.out:
             print('writing results to {}'.format(args.out))
