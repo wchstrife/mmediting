@@ -4,6 +4,7 @@ import torch.nn as nn
 import mmedit.models.common.fba_layer_WS as L
 
 from mmedit.models.registry import COMPONENTS
+from mmcv.cnn.utils.weight_init import xavier_init
 
 
 @COMPONENTS.register_module()
@@ -57,6 +58,12 @@ class FBADecoder(nn.Module):
             nn.LeakyReLU(),
             nn.Conv2d(16, 7, kernel_size=1, padding=0, bias=True)
         )
+    
+    def init_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                xavier_init(m)
+
     
     def forward(self, conv_out, img, indices, two_chan_trimap):
         conv5 = conv_out[-1]    # encoder最后一层的输出

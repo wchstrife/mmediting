@@ -9,6 +9,7 @@ from .necks import ContextualAttentionNeck, GLDilationNeck
 from .pconv_encoder_decoder import PConvEncoderDecoder
 from .simple_encoder_decoder import SimpleEncoderDecoder
 from .two_stage_encoder_decoder import DeepFillEncoderDecoder
+from .fba_encoder_decoder import FBAEncoderDecoder
 
 __all__ = [
     'GLEncoderDecoder', 'SimpleEncoderDecoder', 'VGG16', 'GLEncoder',
@@ -17,5 +18,5 @@ __all__ = [
     'ResShortcutDec', 'HolisticIndexBlock', 'DepthwiseIndexBlock',
     'DeepFillEncoder', 'DeepFillEncoderDecoder', 'DeepFillDecoder',
     'ContextualAttentionNeck', 'IndexedUpsample', 'IndexNetEncoder',
-    'IndexNetDecoder', 'ResGCAEncoder', 'ResGCADecoder'
+    'IndexNetDecoder', 'ResGCAEncoder', 'ResGCADecoder', 'FBAEncoderDecoder'
 ]

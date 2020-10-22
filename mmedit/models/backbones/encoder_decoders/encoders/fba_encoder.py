@@ -6,6 +6,8 @@ import mmedit.models.backbones.encoder_decoders.encoders.fba_resnet_bn as resnet
 import mmedit.models.backbones.encoder_decoders.encoders.fba_resnet_GN_WS as resnet_GN_WS
 
 from mmedit.models.registry import COMPONENTS
+from mmedit.utils.logger import get_root_logger
+from mmcv.runner import load_checkpoint
 
 def build_encoder(self, arch='resnet50_GN_WS'):
     if arch == 'resnet50_GN_WS':
@@ -42,11 +44,54 @@ def build_encoder(self, arch='resnet50_GN_WS'):
 
 @COMPONENTS.register_module()
 class FBAEncoder(nn.Module):
-    def __init__(self, backbone_mode='resnet50_GN_WS'):
-        self.encoder = build_encoder(backbone_mode)
+    def __init__(self, in_channels, block):
+        super(FBAEncoder, self).__init__()
+        assert in_channels == 11, (f'in_channels must be 11, but got {in_channels}')
 
-    def forward(self, x):
-        return self.encoder(x)
+        if block == 'resnet50_GN_WS':
+            orig_resnet = resnet_GN_WS.__dict__['l_resnet50']()
+            net_encoder = ResnetDilated(orig_resnet, dilate_scale=8)
+        elif block == 'resnet50_BN':
+            orig_resnet = resnet_bn.__dict__['l_resnet50']()
+            net_encoder = ResnetDilatedBN(orig_resnet, dilate_scale=8)
+        else:
+            raise Exception('Architecture undefined!')
+
+        if(in_channels > 3):
+            print(f'modifying input layer to accept {in_channels} channels')
+            net_encoder_sd = net_encoder.state_dict()
+            conv1_weights = net_encoder_sd['conv1.weight']      
+
+            c_out, c_in, h, w = conv1_weights.size()
+            conv1_mod = torch.zeros(c_out, in_channels, h, w)
+            conv1_mod[:, :3, :, :] = conv1_weights              
+
+            conv1 = net_encoder.conv1
+            conv1.in_channels = in_channels
+            conv1.weight = torch.nn.Parameter(conv1_mod)
+
+            net_encoder.conv1 = conv1
+
+            net_encoder_sd['conv1.weight'] = conv1_mod
+
+            net_encoder.load_state_dict(net_encoder_sd)
+
+            self.encoder = net_encoder
+   
+    
+    def init_weights(self, pretrained=None):
+        if isinstance(pretrained, str):
+            self.encoder.conv1.weight.data[:, 3:, :, :] = 0
+        
+            logger = get_root_logger()
+            load_checkpoint(self, pretrained, strict=False, logger=logger)
+        elif pretrained is None:
+            pass
+        else:
+            raise TypeError(f'"pretrained" must be a str or None.' f'But received {type(pretrained)}')
+
+    def forward(self, x, return_feature_maps=False):
+        return self.encoder(x, return_feature_maps)
 
 class ResnetDilatedBN(nn.Module):
     def __init__(self, orig_resnet, dilate_scale=8):

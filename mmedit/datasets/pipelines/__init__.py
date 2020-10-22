@@ -6,7 +6,7 @@ from .compose import Compose
 from .crop import (Crop, CropAroundCenter, CropAroundFg, CropAroundUnknown,
                    FixedCrop, ModCrop, PairedRandomCrop)
 from .formating import (Collect, FormatTrimap, GetMaskedImage, ImageToTensor,
-                        ToTensor)
+                        ToTensor, FormatTrimap2Channel, FormatTrimap6Channel)
 from .loading import (GetSpatialDiscountMask, LoadImageFromFile,
                       LoadImageFromFileList, LoadMask, LoadPairedImageFromFile,
                       RandomLoadResizeBg)
@@ -25,5 +25,6 @@ __all__ = [
     'MergeFgAndBg', 'CompositeFg', 'TemporalReverse', 'LoadImageFromFileList',
     'GenerateFrameIndices', 'GenerateFrameIndiceswithPadding', 'FixedCrop',
     'LoadPairedImageFromFile', 'GenerateSoftSeg', 'GenerateSeg', 'PerturbBg',
-    'CropAroundFg', 'GetSpatialDiscountMask', 'GenerateTrimapWithDistTransform'
+    'CropAroundFg', 'GetSpatialDiscountMask', 'GenerateTrimapWithDistTransform',
+    'FormatTrimap2Channel', 'FormatTrimap6Channel'
 ]

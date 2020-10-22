@@ -285,7 +285,7 @@ class FormatTrimap6Channel(object):
     """
     def __call__(self, results):
         trimap = results['trimap'].squeeze()
-        h, w = trimap.shape
+        h, w, _ = trimap.shape
 
         clicks = np.zeros((h, w, 6))
         for k in range(2):

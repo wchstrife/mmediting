@@ -84,7 +84,6 @@ class Bottleneck(nn.Module):
 
         return out
 
-@COMPONENTS.register_module()
 class ResNet(nn.Module):
 
     def __init__(self, block, layers, num_classes=1000):

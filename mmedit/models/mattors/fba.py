@@ -20,23 +20,45 @@ class FBA(BaseMattor):
     def forward_dummy(self, inputs):
         return self.backbone(inputs)
 
+    def forward(self,
+                ori_merged,
+                trimap,
+                merged,
+                trimap_transformed,
+                meta,
+                alpha=None,
+                test_mode=False,
+                **kwargs):
+        if not test_mode:
+            return self.forward_train(merged, trimap, meta, alpha, **kwargs)
+        else:
+            return self.forward_test(ori_merged, trimap, merged, trimap_transformed, meta, **kwargs)
+
     # TODO: 添加训练代码
     def forward_train(self, parameter_list):
         pass
 
     # TODO： 添加参数注释
-    def forward_test(self, image, two_chan_trimap, image_n, trimap_transformed, meta, save_image=False, save_path=None, iteration=None):
+    def forward_test(self, ori_merged, trimap, merged, trimap_transformed, meta, save_image=False, save_path=None, iteration=None):
 
-        resnet_input = torch.cat((image_n, trimap_transformed, two_chan_trimap), 1)
-        result = self.backbone(resnet_input, image)
+        # resnet_input = torch.cat((image_n, trimap_transformed, two_chan_trimap), 1)
+        # print(resnet_input.shape)
+
+        result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
+        result = result.cpu().numpy().squeeze()
+        # print(result.shape)
         
-        # TODO: 分离Decoder的输出
-        pred_alpha = result.cpu().numpy().squeeze()
+        pred_alpha = result[0, :, :]
+        fg = result[1:4, :, :]
+        bg = result[4:7, :, :]
+
         pred_alpha = self.restore_shape(pred_alpha, meta)
         eval_result = self.evaluate(pred_alpha, meta)
+        
 
         if save_image:
             self.save_image(pred_alpha, meta, save_path, iteration)
 
-        return {'pred_alpha': pred_alpha, 'eval_result': eval_result}
+        return {'pred_alpha': pred_alpha, 'eval_result': eval_result, 'fg': fg, 'bg': bg}
+
         
