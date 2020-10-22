@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 
 import mmcv
+import cv2
 import numpy as np
 import torch
 from mmcv.parallel import DataContainer as DC
@@ -260,3 +261,49 @@ class Collect(object):
     def __repr__(self):
         return self.__class__.__name__ + (
             f'(keys={self.keys}, meta_keys={self.meta_keys})')
+
+@PIPELINES.register_module()
+class FormatTrimap2Channel(object):
+    """ Convert trimap to 2 channel
+    """
+    def __call__(self, results):
+        trimap = results['trimap'].squeeze()
+        h, w = trimap.shape
+        trimap_2C = np.zeros((h, w, 2))
+        trimap_2C[trimap == 1, 1] = 1
+        trimap_2C[trimap == 0, 0] = 0
+        results['trimap'] = trimap_2C
+
+        return results
+
+    def __repr__(self):
+        return self.__class__.__name__
+
+@PIPELINES.register_module()
+class FormatTrimap6Channel(object):
+    """ Convert trimap to 6 channel
+    """
+    def __call__(self, results):
+        trimap = results['trimap'].squeeze()
+        h, w = trimap.shape
+
+        clicks = np.zeros((h, w, 6))
+        for k in range(2):
+            if (np.count_nonzero(trimap[:, :, k]) > 0):
+                dt_mask = -dt(1 - trimap[:, :, k])**2
+                L = 320
+                clicks[:, :, 3*k] = np.exp(dt_mask / (2 * ((0.02 * L)**2)))
+                clicks[:, :, 3*k+1] = np.exp(dt_mask / (2 * ((0.08 * L)**2)))
+                clicks[:, :, 3*k+2] = np.exp(dt_mask / (2 * ((0.16 * L)**2)))
+        
+        results['trimap_transformed'] = clicks
+
+        return results
+        
+
+
+    def __repr__(self):
+        return self.__class__.__name__
+        
+def dt(a):
+    return cv2.distanceTransform((a * 255).astype(np.uint8), cv2.DIST_L2, 0)
