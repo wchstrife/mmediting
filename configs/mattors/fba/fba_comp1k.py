@@ -67,6 +67,7 @@ test_pipeline = [
     dict(type='ImageToTensor', keys=['ori_merged','trimap' , 'merged', 'trimap_transformed']),
 ]
 
+
 data = dict(
     samples_per_gpu=1,
     workers_per_gpu=4,
@@ -109,7 +110,7 @@ log_config = dict(
 total_iters = 1000000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/dim_finetune'
-load_from = './work_dirs/dim_stage2/latest.pth'
+work_dir = './work_dirs/fba'
+load_from = './work_dirs/fba/FBA_rename.pth'
 resume_from = None
 workflow = [('train', 1)]
