@@ -62,13 +62,39 @@ def matting_inference(model, img, trimap):
         result = model(test_mode=True, **data)
 
     return result['pred_alpha']
-    return 'infer success!'
+
+def rename_pth(checkpoint):
+    from collections import OrderedDict
+
+    fy = torch.load(checkpoint)
+    if 'state_dict' in fy:
+        state_dict = fy['state_dict']
+    else:
+        state_dict = fy
+
+    new_state_dict = OrderedDict()
+
+    for k, v in state_dict.items():
+        if k.find('encoder') > 0:
+            name = k.replace('encoder', 'encoder.encoder')
+        name = 'backbone' + name
+
+    for i in state_dict.keys():
+        print(i, list(state_dict[i].size()))
+    
+    torch.save(fy, 'work_dirs/fba/FBA_rename.pth')
+
 
 def main():
     args = parse_args()
 
+    rename_pth(args.checkpoint)
+
     model = init_model(
         args.config, args.checkpoint, device=torch.device('cuda', args.device))
+
+    for i in model.state_dict():
+        print(i)
 
     pred_alpha = matting_inference(model, args.img_path,
                                    args.trimap_path) * 255
