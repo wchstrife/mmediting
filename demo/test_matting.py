@@ -75,20 +75,20 @@ def rename_pth(checkpoint):
     new_state_dict = OrderedDict()
 
     for k, v in state_dict.items():
-        if k.find('encoder') > 0:
-            name = k.replace('encoder', 'encoder.encoder')
-        name = 'backbone' + name
+        name = k.replace('encoder', 'encoder.encoder')
+        name = 'backbone.' + name
+        new_state_dict[name] = v
 
-    for i in state_dict.keys():
-        print(i, list(state_dict[i].size()))
+    for i in new_state_dict.keys():
+        print(i, list(new_state_dict[i].size()))
     
-    torch.save(fy, 'work_dirs/fba/FBA_rename.pth')
+    torch.save(new_state_dict, 'work_dirs/fba/FBA_rename.pth')
 
 
 def main():
     args = parse_args()
 
-    rename_pth(args.checkpoint)
+    # rename_pth(args.checkpoint)
 
     model = init_model(
         args.config, args.checkpoint, device=torch.device('cuda', args.device))
@@ -99,10 +99,10 @@ def main():
     pred_alpha = matting_inference(model, args.img_path,
                                    args.trimap_path) * 255
 
-    print(pred_alpha)
-    # mmcv.imwrite(pred_alpha, args.save_path)
-    # if args.imshow:
-    #     mmcv.imshow(pred_alpha, 'predicted alpha matte')
+    # print(pred_alpha)
+    mmcv.imwrite(pred_alpha, args.save_path)
+    if args.imshow:
+        mmcv.imshow(pred_alpha, 'predicted alpha matte')
 
 
 if __name__ == '__main__':

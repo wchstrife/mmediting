@@ -46,11 +46,15 @@ class FBA(BaseMattor):
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
         result = result.cpu().numpy().squeeze()
+        trimap = trimap.cpu().numpy().squeeze()
         # print(result.shape)
         
         pred_alpha = result[0, :, :]
         fg = result[1:4, :, :]
         bg = result[4:7, :, :]
+
+        pred_alpha[trimap[0, :, :] == 1] = 0
+        pred_alpha[trimap[1, :, :] == 1] = 1 
 
         pred_alpha = self.restore_shape(pred_alpha, meta)
         eval_result = self.evaluate(pred_alpha, meta)
