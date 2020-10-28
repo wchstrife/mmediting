@@ -1,18 +1,5 @@
-# model settings
-# model = dict(
-#     type='DIM',
-#     backbone=dict(
-#         type='SimpleEncoderDecoder',
-#         encoder=dict(type='VGG16', in_channels=4),
-#         decoder=dict(type='PlainDecoder')),
-#     refiner=dict(type='PlainRefiner'),
-#     pretrained=None,
-#     loss_alpha=dict(type='CharbonnierLoss', loss_weight=0.5),
-#     loss_comp=dict(type='CharbonnierCompLoss', loss_weight=0.5),
-#     loss_refine=dict(type='CharbonnierLoss'))
-# train_cfg = dict(train_backbone=True, train_refiner=True)
-# test_cfg = dict(refine=True, metrics=['SAD', 'MSE', 'GRAD', 'CONN'])
 
+# model settings
 model = dict(
     type='FBA',
     backbone=dict(
@@ -50,6 +37,7 @@ test_pipeline = [
     dict(
         type='LoadImageFromFile', 
         key='merged', 
+        channel_order='rgb',
         save_original_img=True),
 
     dict(type='FormatTrimap2Channel'),
