@@ -895,3 +895,32 @@ class TemporalReverse(object):
         repr_str = self.__class__.__name__
         repr_str += f'(keys={self.keys}, reverse_ratio={self.reverse_ratio})'
         return repr_str
+
+@PIPELINES.register_module()
+class ScaleInput(object):
+    """FBA scales inputs narray to multiple of 8
+
+    Args:
+        keys (list[str]): The frame lists to be scales.
+        scale (float): 
+        scale_type: 
+    """
+    def __init__(self, keys, scale, scale_type):
+        self.keys = keys
+        self.scale = scale
+        self.scale_type = scale_type
+        
+
+    def __call__(self, results):
+        for key in self.keys:
+            h, w = results[key].shape[:2]
+            h1 = int(np.ceil(self.scale * h / 8) * 8)
+            w1 = int(np.ceil(self.scale * w / 8) * 8)
+            results[key] = cv2.resize(results[key], (w1, h1), interpolation = self.scale_type)
+
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(keys={self.keys}, scale_type={self.scale_type})'
+        return repr_str

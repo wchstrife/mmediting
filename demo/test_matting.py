@@ -55,6 +55,18 @@ def matting_inference(model, img, trimap):
     # prepare data
     data = dict(merged_path=img, trimap_path=trimap)
     data = test_pipeline(data)
+
+    # Test Code
+    merged = data['merged'] 
+    ori_merged = data['ori_merged']
+    trimap = data['trimap']
+    trimap_transformed = data['trimap_transformed']
+
+    ori_merged.cpu().numpy().tofile('dat/' + 'ori_merged' + '.dat')
+    merged.cpu().numpy().tofile('dat/' + 'merged' + '.dat')
+    trimap.cpu().numpy().tofile('dat/' + 'trimap' + '.dat')
+    trimap_transformed.numpy().tofile('dat/' + 'trimap_transformed' + '.dat')
+
     data = scatter(collate([data], samples_per_gpu=1), [device])[0]
     print("data prepare success!!!")
     # forward the model
@@ -93,8 +105,8 @@ def main():
     model = init_model(
         args.config, args.checkpoint, device=torch.device('cuda', args.device))
 
-    for i in model.state_dict():
-        print(i)
+    # for i in model.state_dict():
+    #     print(i)
 
     pred_alpha = matting_inference(model, args.img_path,
                                    args.trimap_path) * 255

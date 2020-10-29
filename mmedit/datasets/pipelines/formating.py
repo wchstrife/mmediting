@@ -266,13 +266,17 @@ class Collect(object):
 class FormatTrimap2Channel(object):
     """ Convert trimap to 2 channel
     """
+
+    def __init__(self, key):
+        self.key = key
+
     def __call__(self, results):
-        trimap = results['trimap'].squeeze()
+        trimap = results[self.key].squeeze()
         h, w = trimap.shape
         trimap_2C = np.zeros((h, w, 2))
         trimap_2C[trimap == 1, 1] = 1
-        trimap_2C[trimap == 0, 0] = 0
-        results['trimap'] = trimap_2C
+        trimap_2C[trimap == 0, 0] = 1
+        results[self.key] = trimap_2C
 
         return results
 
@@ -283,8 +287,11 @@ class FormatTrimap2Channel(object):
 class FormatTrimap6Channel(object):
     """ Convert trimap to 6 channel
     """
+    def __init__(self, key):
+        self.key = key
+
     def __call__(self, results):
-        trimap = results['trimap'].squeeze()
+        trimap = results[self.key].squeeze()
         h, w, _ = trimap.shape
 
         clicks = np.zeros((h, w, 6))
@@ -296,11 +303,10 @@ class FormatTrimap6Channel(object):
                 clicks[:, :, 3*k+1] = np.exp(dt_mask / (2 * ((0.08 * L)**2)))
                 clicks[:, :, 3*k+2] = np.exp(dt_mask / (2 * ((0.16 * L)**2)))
         
-        results['trimap_transformed'] = clicks
+        results[f'{self.key}_transformed'] = clicks
 
         return results
         
-
 
     def __repr__(self):
         return self.__class__.__name__

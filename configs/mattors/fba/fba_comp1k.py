@@ -18,40 +18,54 @@ test_cfg = dict(metrics=['SAD', 'MSE', 'GRAD', 'CONN'])
 dataset_type = 'AdobeComp1kDataset'
 data_root = '/mnt/lustre/share/3darseg/segmentation/matting/'
 img_norm_cfg = dict(
-    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], to_rgb=True)
+    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], to_rgb=False)
 
 train_pipeline = [
 ]
 
 test_pipeline = [
+
     dict(
         type='LoadImageFromFile',
         key='alpha',
         flag='grayscale',
-        save_original_img=True),
+        save_original_img=True),    # ori_alpha
     dict(
         type='LoadImageFromFile',
         key='trimap',
         flag='grayscale',
-        save_original_img=True),
+        save_original_img=True),    # ori_trimap
     dict(
         type='LoadImageFromFile', 
         key='merged', 
         channel_order='rgb',
-        save_original_img=True),
+        save_original_img=True),    # ori_merged
 
-    dict(type='FormatTrimap2Channel'),
-    # dict(type='Pad', keys=['trimap', 'merged', 'ori_merged'], mode='reflect'),    # 要不要pad原始图
-    dict(type='Pad', keys=['trimap', 'merged', 'ori_merged'], mode='reflect'),
-    dict(type='RescaleToZeroOne', keys=['merged', 'trimap', 'ori_merged']),
-    dict(type='Normalize', keys=['merged'], **img_norm_cfg),   
-    dict(type='FormatTrimap6Channel'), # results['trimap_transformed']
+    dict(type='RescaleToZeroOne', keys=['merged', 'trimap', 'ori_merged', 'ori_trimap']),
+
+    dict(type='FormatTrimap2Channel', key='trimap'),
+    dict(type='FormatTrimap2Channel', key='ori_trimap'),
+
+    dict(
+        type='ScaleInput',
+        keys=['merged', 'trimap', 'ori_merged'],
+        scale=1.0,
+        scale_type=4),  # INTER_LANCZOS4=4
+
+    dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
+    
+    # dict(type='Pad', keys=['trimap_np', 'image_np', 'ori_image_np'], mode='reflect'),
+    dict(type='Normalize', keys=['merged'], **img_norm_cfg),
+
+    
+
     dict(
         type='Collect',
         keys=['ori_merged','trimap' , 'merged', 'trimap_transformed'],
         meta_keys=[
-            'merged_path', 'pad', 'merged_ori_shape', 'ori_alpha', 'ori_trimap'
+            'merged_path', 'merged_ori_shape', 'ori_alpha', 'ori_trimap'
         ]),
+
     dict(type='ImageToTensor', keys=['ori_merged','trimap' , 'merged', 'trimap_transformed']),
 ]
 

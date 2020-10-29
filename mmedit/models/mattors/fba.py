@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import cv2
 
 from ..builder import build_loss
 from ..registry import MODELS
@@ -45,18 +46,22 @@ class FBA(BaseMattor):
         # print(resnet_input.shape)
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
-        result = result.cpu().numpy().squeeze()
-        trimap = trimap.cpu().numpy().squeeze()
-        # print(result.shape)
+
+        result = self.restore_shape(result, meta) # TODO: 将这里封装进restore_shape
+
+        pred_alpha = result[:, :, 0]
+        fg = result[:, :, 1:4]
+        bg = result[:, :, 4:7]
+
+        ori_trimap = meta[0]['ori_trimap'].squeeze()
+        pred_alpha[ori_trimap[:, :, 0] == 1] = 0
+        pred_alpha[ori_trimap[:, :, 1] == 1] = 1
+        # fg[alpha == 1] = image_np[alpha == 1] # TODO: 需要返回fg和bg时，需要用到merge_np，也就是ori_merge，但是在这里的实现已经经过了插值，改变的话需要重写norm层保留下来原来的ori_merged
+        # bg[alpha == 0] = image_np[alpha == 0]
+
+        # result = result.cpu().numpy().squeeze()
+        # trimap = trimap.cpu().numpy().squeeze()
         
-        pred_alpha = result[0, :, :]
-        fg = result[1:4, :, :]
-        bg = result[4:7, :, :]
-
-        pred_alpha[trimap[0, :, :] == 1] = 0
-        pred_alpha[trimap[1, :, :] == 1] = 1 
-
-        pred_alpha = self.restore_shape(pred_alpha, meta)
         eval_result = self.evaluate(pred_alpha, meta)
         
 
@@ -66,3 +71,26 @@ class FBA(BaseMattor):
         return {'pred_alpha': pred_alpha, 'eval_result': eval_result, 'fg': fg, 'bg': bg}
 
         
+    def restore_shape(self, result, meta):
+        """Restore the result to the original shape.
+
+        The shape of the predicted alpha may not be the same as the shape of
+        original input image. This function restores the shape of the predicted
+        alpha.
+
+        Args:
+            pred_alpha (np.ndarray): The predicted alpha.
+            meta (list[dict]): Meta data about the current data batch.
+                Currently only batch_size 1 is supported.
+
+        Returns:
+            np.ndarray: The reshaped predicted alpha.
+        """
+  
+        ori_h, ori_w = meta[0]['merged_ori_shape'][:2]
+
+        result = cv2.resize(result[0].cpu().numpy().transpose(1, 2, 0), (ori_w, ori_h), cv2.INTER_LANCZOS4) 
+
+        assert result.shape[:2] == (ori_h, ori_w)
+
+        return result
