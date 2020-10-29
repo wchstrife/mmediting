@@ -57,8 +57,6 @@ test_pipeline = [
     # dict(type='Pad', keys=['trimap_np', 'image_np', 'ori_image_np'], mode='reflect'),
     dict(type='Normalize', keys=['merged'], **img_norm_cfg),
 
-    
-
     dict(
         type='Collect',
         keys=['ori_merged','trimap' , 'merged', 'trimap_transformed'],

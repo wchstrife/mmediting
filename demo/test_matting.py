@@ -62,8 +62,8 @@ def matting_inference(model, img, trimap):
     trimap = data['trimap']
     trimap_transformed = data['trimap_transformed']
 
-    ori_merged.cpu().numpy().tofile('dat/' + 'ori_merged' + '.dat')
-    merged.cpu().numpy().tofile('dat/' + 'merged' + '.dat')
+    ori_merged.cpu().numpy().tofile('dat/' + 'ori_merged_new' + '.dat')
+    merged.cpu().numpy().tofile('dat/' + 'merged_rgbtrue' + '.dat')
     trimap.cpu().numpy().tofile('dat/' + 'trimap' + '.dat')
     trimap_transformed.numpy().tofile('dat/' + 'trimap_transformed' + '.dat')
 
