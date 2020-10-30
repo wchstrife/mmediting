@@ -27,7 +27,11 @@ class FBADecoder(nn.Module):
         self.ppm = nn.ModuleList(self.ppm)
 
         self.conv_up1 = nn.Sequential(
-            L.Conv2d(2048 + len(pool_scales) * 256, 256, kernel_size=3, padding=1, bias=True),
+            L.Conv2d(2048 + len(pool_scales) * 256, 256,
+                     kernel_size=3, padding=1, bias=True),
+            norm(256, self.batch_norm),
+            nn.LeakyReLU(),
+            L.Conv2d(256, 256, kernel_size=3, padding=1),
             norm(256, self.batch_norm),
             nn.LeakyReLU()
         )

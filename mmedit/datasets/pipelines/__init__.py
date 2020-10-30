@@ -13,7 +13,7 @@ from .loading import (GetSpatialDiscountMask, LoadImageFromFile,
 from .matting_aug import (CompositeFg, GenerateSeg, GenerateSoftSeg,
                           GenerateTrimap, GenerateTrimapWithDistTransform,
                           MergeFgAndBg, PerturbBg)
-from .normalization import Normalize, RescaleToZeroOne
+from .normalization import Normalize, RescaleToZeroOne, GroupNoraliseImage
 
 __all__ = [
     'Collect', 'FormatTrimap', 'LoadImageFromFile', 'LoadMask',
@@ -26,5 +26,5 @@ __all__ = [
     'GenerateFrameIndices', 'GenerateFrameIndiceswithPadding', 'FixedCrop',
     'LoadPairedImageFromFile', 'GenerateSoftSeg', 'GenerateSeg', 'PerturbBg',
     'CropAroundFg', 'GetSpatialDiscountMask', 'GenerateTrimapWithDistTransform',
-    'FormatTrimap2Channel', 'FormatTrimap6Channel', 'ScaleInput'
+    'FormatTrimap2Channel', 'FormatTrimap6Channel', 'ScaleInput', 'GroupNoraliseImage'
 ]

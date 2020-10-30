@@ -56,24 +56,50 @@ def matting_inference(model, img, trimap):
     data = dict(merged_path=img, trimap_path=trimap)
     data = test_pipeline(data)
 
-    # Test Code
-    merged = data['merged'] 
-    ori_merged = data['ori_merged']
-    trimap = data['trimap']
-    trimap_transformed = data['trimap_transformed']
+    # # Test Code
+    # merged = data['merged'] 
+    # ori_merged = data['ori_merged']
+    # trimap = data['trimap']
+    # trimap_transformed = data['trimap_transformed']
 
-    ori_merged.cpu().numpy().tofile('dat/' + 'ori_merged_new' + '.dat')
-    merged.cpu().numpy().tofile('dat/' + 'merged_rgbtrue' + '.dat')
-    trimap.cpu().numpy().tofile('dat/' + 'trimap' + '.dat')
-    trimap_transformed.numpy().tofile('dat/' + 'trimap_transformed' + '.dat')
+    # ori_merged.cpu().numpy().tofile('dat/' + 'ori_merged_new' + '.dat')
+    # merged.cpu().numpy().tofile('dat/' + 'merged_rgbtrue' + '.dat')
+    # trimap.cpu().numpy().tofile('dat/' + 'trimap' + '.dat')
+    # trimap_transformed.numpy().tofile('dat/' + 'trimap_transformed' + '.dat')
 
     data = scatter(collate([data], samples_per_gpu=1), [device])[0]
+
+    # merged = data['merged'] 
+    # merged.cpu().numpy().tofile('dat/merged_tensor_new_norm_list.dat')
     print("data prepare success!!!")
     # forward the model
     with torch.no_grad():
         result = model(test_mode=True, **data)
 
     return result['pred_alpha']
+
+def main():
+    args = parse_args()
+
+    # rename_pth(args.checkpoint)
+
+    model = init_model(
+        args.config, args.checkpoint, device=torch.device('cuda', args.device))
+
+    for i in model.state_dict():
+        print(i)
+
+    pred_alpha = matting_inference(model, args.img_path,
+                                   args.trimap_path) * 255
+
+    # print(pred_alpha)
+    mmcv.imwrite(pred_alpha, args.save_path)
+    if args.imshow:
+        mmcv.imshow(pred_alpha, 'predicted alpha matte')
+
+
+if __name__ == '__main__':
+    main()
 
 def rename_pth(checkpoint):
     from collections import OrderedDict
@@ -95,27 +121,3 @@ def rename_pth(checkpoint):
         print(i, list(new_state_dict[i].size()))
     
     torch.save(new_state_dict, 'work_dirs/fba/FBA_rename.pth')
-
-
-def main():
-    args = parse_args()
-
-    # rename_pth(args.checkpoint)
-
-    model = init_model(
-        args.config, args.checkpoint, device=torch.device('cuda', args.device))
-
-    # for i in model.state_dict():
-    #     print(i)
-
-    pred_alpha = matting_inference(model, args.img_path,
-                                   args.trimap_path) * 255
-
-    # print(pred_alpha)
-    mmcv.imwrite(pred_alpha, args.save_path)
-    if args.imshow:
-        mmcv.imshow(pred_alpha, 'predicted alpha matte')
-
-
-if __name__ == '__main__':
-    main()

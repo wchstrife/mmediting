@@ -47,7 +47,11 @@ class FBA(BaseMattor):
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
 
+        result.cpu().numpy().tofile('/home2/wangchenhao/mmediting/dat/result_before_reshape.dat')
+
         result = self.restore_shape(result, meta) # TODO: 将这里封装进restore_shape
+
+        result.tofile('/home2/wangchenhao/mmediting/dat/result_after_reshape.dat')
 
         pred_alpha = result[:, :, 0]
         fg = result[:, :, 1:4]
@@ -56,6 +60,8 @@ class FBA(BaseMattor):
         ori_trimap = meta[0]['ori_trimap'].squeeze()
         pred_alpha[ori_trimap[:, :, 0] == 1] = 0
         pred_alpha[ori_trimap[:, :, 1] == 1] = 1
+
+        pred_alpha.tofile('/home2/wangchenhao/mmediting/dat/pred.dat')
         # fg[alpha == 1] = image_np[alpha == 1] # TODO: 需要返回fg和bg时，需要用到merge_np，也就是ori_merge，但是在这里的实现已经经过了插值，改变的话需要重写norm层保留下来原来的ori_merged
         # bg[alpha == 0] = image_np[alpha == 0]
 
