@@ -81,21 +81,22 @@ def matting_inference(model, img, trimap):
 def main():
     args = parse_args()
 
-    # rename_pth(args.checkpoint)
+    rename_pth(args.checkpoint)
+    print('rename success')
 
-    model = init_model(
-        args.config, args.checkpoint, device=torch.device('cuda', args.device))
+    # model = init_model(
+    #     args.config, args.checkpoint, device=torch.device('cuda', args.device))
 
-    for i in model.state_dict():
-        print(i)
+    # for i in model.state_dict():
+    #     print(i)
 
-    pred_alpha = matting_inference(model, args.img_path,
-                                   args.trimap_path) * 255
+    # pred_alpha = matting_inference(model, args.img_path,
+    #                                args.trimap_path) * 255
 
-    # print(pred_alpha)
-    mmcv.imwrite(pred_alpha, args.save_path)
-    if args.imshow:
-        mmcv.imshow(pred_alpha, 'predicted alpha matte')
+    # # print(pred_alpha)
+    # mmcv.imwrite(pred_alpha, args.save_path)
+    # if args.imshow:
+    #     mmcv.imshow(pred_alpha, 'predicted alpha matte')
 
 
 if __name__ == '__main__':
@@ -120,4 +121,4 @@ def rename_pth(checkpoint):
     for i in new_state_dict.keys():
         print(i, list(new_state_dict[i].size()))
     
-    torch.save(new_state_dict, 'work_dirs/fba/FBA_rename.pth')
+    torch.save(new_state_dict, 'work_dirs/fba/FBA_rename_pat.pth')
