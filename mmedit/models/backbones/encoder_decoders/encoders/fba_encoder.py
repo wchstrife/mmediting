@@ -4,8 +4,8 @@ import torch.nn as nn
 # import mmedit.models.backbones.encoder_decoders.encoders.fba_resnet_bn as resnet_bn
 # import mmedit.models.backbones.encoder_decoders.encoders.fba_resnet_GN_WS as resnet_GN_WS
 
-import fba_resnet_bn as resnet_bn
-import fba_resnet_GN_WS as resnet_GN_WS
+import .fba_resnet_bn as resnet_bn
+import .fba_resnet_GN_WS as resnet_GN_WS
 
 from mmedit.models.registry import COMPONENTS
 from mmedit.utils.logger import get_root_logger
