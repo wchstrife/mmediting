@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 
-import mmedit.models.common.fba_layer_WS as L
 import mmedit.models.backbones.encoder_decoders.encoders.fba_resnet_bn as resnet_bn
 import mmedit.models.backbones.encoder_decoders.encoders.fba_resnet_GN_WS as resnet_GN_WS
 
