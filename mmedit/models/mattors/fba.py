@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import cv2
+import numpy as np
 
 from ..builder import build_loss
 from ..registry import MODELS
@@ -47,7 +48,7 @@ class FBA(BaseMattor):
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
 
-        result.cpu().numpy().tofile('/home2/wangchenhao/mmediting/dat/result_before_reshape.dat')
+        # result.cpu().numpy().tofile('/home2/wangchenhao/mmediting/dat/result_before_reshape.dat')
 
         result = self.restore_shape(result, meta) # TODO: 将这里封装进restore_shape
 
@@ -61,7 +62,7 @@ class FBA(BaseMattor):
         pred_alpha[ori_trimap[:, :, 0] == 1] = 0
         pred_alpha[ori_trimap[:, :, 1] == 1] = 1
 
-        pred_alpha.tofile('/home2/wangchenhao/mmediting/dat/pred.dat')
+        # pred_alpha.tofile('/home2/wangchenhao/mmediting/dat/pred.dat')
         # fg[alpha == 1] = image_np[alpha == 1] # TODO: 需要返回fg和bg时，需要用到merge_np，也就是ori_merge，但是在这里的实现已经经过了插值，改变的话需要重写norm层保留下来原来的ori_merged
         # bg[alpha == 0] = image_np[alpha == 0]
 
@@ -74,7 +75,7 @@ class FBA(BaseMattor):
         if save_image:
             self.save_image(pred_alpha, meta, save_path, iteration)
 
-        return {'pred_alpha': pred_alpha, 'eval_result': eval_result, 'fg': fg, 'bg': bg}
+        return {'pred_alpha': pred_alpha, 'eval_result': eval_result}
 
         
     def restore_shape(self, result, meta):
@@ -100,3 +101,30 @@ class FBA(BaseMattor):
         assert result.shape[:2] == (ori_h, ori_w)
 
         return result
+
+    def evaluate(self, pred_alpha, meta):
+        """Evaluate predicted alpha matte.
+
+        The evaluation metrics are determined by ``self.test_cfg.metrics``.
+
+        Args:
+            pred_alpha (np.ndarray): The predicted alpha matte of shape (H, W).
+            meta (list[dict]): Meta data about the current data batch.
+                Currently only batch_size 1 is supported. Required keys in the
+                meta dict are ``ori_alpha`` and ``copy_trimap``.
+
+        Returns:
+            dict: The evaluation result.
+        """
+        if self.test_cfg.metrics is None:
+            return None
+
+        ori_alpha = meta[0]['ori_alpha'].squeeze()
+        ori_trimap = meta[0]['copy_trimap'].squeeze()   # Note: copy_trimap is the origin np trimap 0-255
+
+        eval_result = dict()
+        for metric in self.test_cfg.metrics:
+            eval_result[metric] = self.allowed_metrics[metric](
+                ori_alpha, ori_trimap,
+                np.round(pred_alpha * 255).astype(np.uint8))
+        return eval_result

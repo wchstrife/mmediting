@@ -474,3 +474,25 @@ class LoadPairedImageFromFile(LoadImageFromFile):
             results['ori_img_b'] = img_b.copy()
 
         return results
+
+@PIPELINES.register_module()
+class CopyImage(object):
+    """Copy image as numpy.
+
+    Args:
+        key (str): Keys in results to copy. 
+    """
+
+    def __init__(self, key):
+        self.key = key
+
+    def __call__(self, results):
+    
+        img = results[self.key]
+        results[f'copy_{self.key}'] = img.copy()
+
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__ + '_cpoy'
+        return repr_str
