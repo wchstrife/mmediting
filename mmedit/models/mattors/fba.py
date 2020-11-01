@@ -51,7 +51,7 @@ class FBA(BaseMattor):
 
         result = self.restore_shape(result, meta) # TODO: 将这里封装进restore_shape
 
-        result.tofile('/home2/wangchenhao/mmediting/dat/result_after_reshape.dat')
+        # result.tofile('/home2/wangchenhao/mmediting/dat/result_after_reshape.dat')
 
         pred_alpha = result[:, :, 0]
         fg = result[:, :, 1:4]
