@@ -78,6 +78,27 @@ def matting_inference(model, img, trimap):
 
     return result['pred_alpha']
 
+def rename_pth(checkpoint):
+    from collections import OrderedDict
+
+    fy = torch.load(checkpoint)
+    if 'state_dict' in fy:
+        state_dict = fy['state_dict']
+    else:
+        state_dict = fy
+
+    new_state_dict = OrderedDict()
+
+    for k, v in state_dict.items():
+        name = k.replace('encoder', 'encoder.encoder')
+        name = 'backbone.' + name
+        new_state_dict[name] = v
+
+    for i in new_state_dict.keys():
+        print(i, list(new_state_dict[i].size()))
+    
+    torch.save(new_state_dict, 'work_dirs/fba/FBA_rename_pat.pth')
+
 def main():
     args = parse_args()
 
@@ -102,23 +123,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-def rename_pth(checkpoint):
-    from collections import OrderedDict
-
-    fy = torch.load(checkpoint)
-    if 'state_dict' in fy:
-        state_dict = fy['state_dict']
-    else:
-        state_dict = fy
-
-    new_state_dict = OrderedDict()
-
-    for k, v in state_dict.items():
-        name = k.replace('encoder', 'encoder.encoder')
-        name = 'backbone.' + name
-        new_state_dict[name] = v
-
-    for i in new_state_dict.keys():
-        print(i, list(new_state_dict[i].size()))
-    
-    torch.save(new_state_dict, 'work_dirs/fba/FBA_rename_pat.pth')
