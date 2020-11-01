@@ -6,7 +6,7 @@ model = dict(
         type='FBAEncoderDecoder',
         encoder=dict(type='FBAEncoder', in_channels=11, block='resnet50_GN_WS'),
         decoder=dict(type='FBADecoder')),
-    pretrained='/home2/wangchenhao/mmediting/work_dirs/fba/FBA_rename.pth',
+    pretrained=None,
     loss_alpha=dict(type='CharbonnierLoss', loss_weight=0.5),
     loss_comp=dict(type='CharbonnierCompLoss', loss_weight=0.5)
 )
