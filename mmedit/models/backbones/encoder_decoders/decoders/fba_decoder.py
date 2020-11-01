@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 
-import mmedit.models.common.fba_layer_WS as L
+# import mmedit.models.common.fba_layer_WS as L
+import fba_layer_WS as L
 
 from mmedit.models.registry import COMPONENTS
 from mmcv.cnn.utils.weight_init import xavier_init
