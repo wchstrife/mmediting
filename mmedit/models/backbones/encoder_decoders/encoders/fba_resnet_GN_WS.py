@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
 
-import mmedit.models.common.fba_layer_WS as L
+from mmedit.models.common import fba_layer_WS as L
+# import mmedit.models.common.fba_layer_WS as L
 from mmedit.models.registry import COMPONENTS
 
-__all__ = ['ResNet', 'l_resnet50']
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
