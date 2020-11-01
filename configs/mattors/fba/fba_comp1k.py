@@ -41,7 +41,7 @@ test_pipeline = [
         channel_order='rgb',
         save_original_img=True),    # ori_merged
 
-    dict(type='CopyImage', key=['trimap']),    # Copy a image for evaluate name: copy_trimap
+    dict(type='CopyImage', key='trimap'),    # Copy a image for evaluate name: copy_trimap
 
     dict(type='RescaleToZeroOne', keys=['merged', 'trimap', 'ori_merged', 'ori_trimap']),
 
