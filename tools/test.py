@@ -114,10 +114,14 @@ def main():
 
     if rank == 0:
         print('')
+        fp = open('result.txt', 'a')
         # print metrics
         stats = dataset.evaluate(outputs)
         for stat in stats:
             print('Eval-{}: {}'.format(stat, stats[stat]))
+            fp.write('Eval-{}: {}\n'.format(stat, stats[stat]))
+        fp.write('_________________\n')
+        fp.close()
 
         # save result pickle
         if args.out:

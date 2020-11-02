@@ -101,7 +101,7 @@ checkpoint_config = dict(interval=40000, by_epoch=False)
 evaluation = dict(interval=40000, save_image=False)
 # yapf:disable
 log_config = dict(
-    interval=10,
+    interval=10,s
     hooks=[
         dict(type='TextLoggerHook', by_epoch=False),
         # dict(type='TensorboardLoggerHook'),
@@ -114,6 +114,6 @@ total_iters = 1000000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba'
-load_from = './work_dirs/fba/FBA_rename.pth'
+load_from = './work_dirs/fba/FBA_rename_pat.pth'
 resume_from = None
 workflow = [('train', 1)]
