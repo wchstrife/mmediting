@@ -6,7 +6,6 @@ import torch.nn.functional as F
 from mmcv.cnn import ConvModule, constant_init, xavier_init
 from mmcv.runner import load_checkpoint
 from mmcv.utils.parrots_wrapper import SyncBatchNorm
-
 from mmedit.models.common import ASPP, DepthwiseSeparableConvModule
 from mmedit.models.registry import COMPONENTS
 from mmedit.utils import get_root_logger
@@ -304,7 +303,7 @@ class InvertedResidual(nn.Module):
 
 
 @COMPONENTS.register_module()
-class IndexNetEncoder(nn.Module):
+class IndexNetShareEncoder(nn.Module):
     """Encoder for IndexNet.
 
     Please refer to https://arxiv.org/abs/1908.00672.
@@ -351,7 +350,7 @@ class IndexNetEncoder(nn.Module):
                  freeze_bn=False,
                  use_nonlinear=True,
                  use_context=True):
-        super(IndexNetEncoder, self).__init__()
+        super(IndexNetShareEncoder, self).__init__()
         if out_stride not in [16, 32]:
             raise ValueError(f'out_stride must 16 or 32, got {out_stride}')
 
@@ -425,6 +424,7 @@ class IndexNetEncoder(nn.Module):
                 index_block(inverted_residual_setting[layer][1], norm_cfg,
                             use_context, use_nonlinear))
         self.avg_pool = nn.AvgPool2d(2, stride=2)
+        self.enc_mask = ConvModule(1, 24, 3, stride=1, padding=1, norm_cfg=norm_cfg, act_cfg=dict(type='Sigmoid'))
 
         if aspp:
             dilation = (2, 4, 8) if out_stride == 32 else (6, 12, 18)
@@ -509,6 +509,8 @@ class IndexNetEncoder(nn.Module):
         dec_idx_feat_list = list()
         shortcuts = list()
         ori_input = x.clone()
+        mask = x[:, -1, :, :].unsqueeze(1).clone()
+        x = x[:, :-1, :, :]
         for i, layer in enumerate(self.layers):
             x = layer(x)
             if i in self.downsampled_layers:
@@ -524,6 +526,9 @@ class IndexNetEncoder(nn.Module):
                 dec_idx_feat_list.append(None)
             if i == 2:
                 neck_in = x.clone()
+                mask = F.interpolate(mask, scale_factor=0.25, mode='bilinear', align_corners=False)
+                mask = self.enc_mask(mask)
+                x = mask * x
 
         x = self.dconv(x)
 

@@ -3,7 +3,6 @@ import random
 import mmcv
 import numpy as np
 from torch.nn.modules.utils import _pair
-
 from ..registry import PIPELINES
 from .utils import random_choose_unknown
 
@@ -85,6 +84,44 @@ class Crop(object):
 
         return repr_str
 
+@PIPELINES.register_module()
+class CropBboxFromAlpha(object):
+    def __init__(self, keys):
+        if 'alpha' not in keys:
+            raise ValueError(f'"alpha" must be in keys, but got {keys}')
+        self.keys = keys
+
+    def getbbox(self, alpha):
+        R, C = alpha.shape[0], alpha.shape[1]
+
+        where = np.array(np.where(alpha!=0))
+        y1, x1 = np.amin(where, axis=1)
+        y2, x2 = np.amax(where, axis=1)
+
+        center = ((x1+x2)//2, (y1+y2)//2)
+        w = x2-x1+1
+        h = y2-y1+1
+
+        if(h>w):
+            w *=1.2
+            h = max(1.2*h, w*1.34)
+        else:
+            h  *= 1.2
+            w = max(1.2*w, h*1.34)
+
+        bbox = (max(0, center[0]-w//2), min(C-1, center[0]+w//2), max(0, center[1]-h//2), min(R-1, center[1]+h//2))
+        return int(bbox[2]), int(bbox[3]), int(bbox[0]), int(bbox[1])
+
+
+    def __call__(self, results):
+        y1, y2, x1, x2 = self.getbbox(results['alpha'])
+        for key in self.keys:
+            results[key] = results[key][y1:y2, x1:x2]
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        return repr_str
 
 @PIPELINES.register_module()
 class FixedCrop(object):
@@ -356,11 +393,12 @@ class CropAroundUnknown(object):
                  keys,
                  crop_sizes,
                  unknown_source='alpha',
+                 wholemap=False,
                  interpolations='bilinear'):
         if 'alpha' not in keys:
             raise ValueError(f'"alpha" must be in keys, but got {keys}')
         self.keys = keys
-
+        self.wholemap = wholemap
         if not isinstance(crop_sizes, list):
             raise TypeError(
                 f'Crop sizes must be list, but got {type(crop_sizes)}.')
@@ -400,8 +438,15 @@ class CropAroundUnknown(object):
         """
         h, w = results[self.keys[0]].shape[:2]
 
-        rand_ind = np.random.randint(len(self.crop_sizes))
-        crop_h, crop_w = self.crop_sizes[rand_ind]
+        if self.wholemap:
+            rand_ind = np.random.randint(len(self.crop_sizes)+1)
+            if rand_ind == len(self.crop_sizes):
+               crop_h, crop_w = min(h, w), min(h, w)
+            else:
+               crop_h, crop_w = self.crop_sizes[rand_ind]
+        else:
+            rand_ind = np.random.randint(len(self.crop_sizes))
+            crop_h, crop_w = self.crop_sizes[rand_ind]
 
         # Make sure h >= crop_h, w >= crop_w. If not, rescale imgs
         rescale_ratio = max(crop_h / h, crop_w / w)

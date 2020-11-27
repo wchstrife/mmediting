@@ -6,8 +6,8 @@ import torch.nn.functional as F
 from mmcv.cnn import ConvModule, constant_init, xavier_init
 from mmcv.runner import load_checkpoint
 from mmcv.utils.parrots_wrapper import SyncBatchNorm
-
-from mmedit.models.common import ASPP, DepthwiseSeparableConvModule
+from mmedit.models.common import DepthwiseSeparableConvModule
+from mmedit.models.common import ASPP_CAFFE as ASPP
 from mmedit.models.registry import COMPONENTS
 from mmedit.utils import get_root_logger
 
@@ -186,7 +186,7 @@ class DepthwiseIndexBlock(nn.Module):
                     use_nonlinear=use_nonlinear))
 
         self.sigmoid = nn.Sigmoid()
-        self.softmax = nn.Softmax(dim=2)
+        self.softmax = nn.Softmax(dim=1)
         self.pixel_shuffle = nn.PixelShuffle(2)
 
     def forward(self, x):
@@ -201,9 +201,9 @@ class DepthwiseIndexBlock(nn.Module):
         n, c, h, w = x.shape
 
         feature_list = [
-            _index_block(x).unsqueeze(2) for _index_block in self.index_blocks
+            _index_block(x).view(c, 1, h//2, w//2) for _index_block in self.index_blocks
         ]
-        x = torch.cat(feature_list, dim=2)
+        x = torch.cat(feature_list, dim=1)
 
         # normalization
         y = self.sigmoid(x)
@@ -215,7 +215,6 @@ class DepthwiseIndexBlock(nn.Module):
         dec_idx_feat = self.pixel_shuffle(y)
 
         return enc_idx_feat, dec_idx_feat
-
 
 class InvertedResidual(nn.Module):
     """Inverted residual layer for indexnet encoder.
@@ -256,6 +255,7 @@ class InvertedResidual(nn.Module):
                 in_channels,
                 out_channels,
                 3,
+                padding=1,
                 stride=stride,
                 dilation=dilation,
                 norm_cfg=norm_cfg,
@@ -268,6 +268,7 @@ class InvertedResidual(nn.Module):
                     in_channels,
                     hidden_dim,
                     1,
+                    padding=1,
                     norm_cfg=norm_cfg,
                     act_cfg=dict(type='ReLU6')),
                 DepthwiseSeparableConvModule(
@@ -295,7 +296,7 @@ class InvertedResidual(nn.Module):
         Returns:
             Tensor: Output feature map.
         """
-        out = self.conv(self.pad(x, self.kernel_size, self.dilation))
+        out = self.conv(x)#self.pad(x, self.kernel_size, self.dilation))
 
         if self.use_res_connect:
             out = out + x
@@ -304,7 +305,7 @@ class InvertedResidual(nn.Module):
 
 
 @COMPONENTS.register_module()
-class IndexNetEncoder(nn.Module):
+class IndexNetShareEncoderCaffe(nn.Module):
     """Encoder for IndexNet.
 
     Please refer to https://arxiv.org/abs/1908.00672.
@@ -351,7 +352,7 @@ class IndexNetEncoder(nn.Module):
                  freeze_bn=False,
                  use_nonlinear=True,
                  use_context=True):
-        super(IndexNetEncoder, self).__init__()
+        super(IndexNetShareEncoderCaffe, self).__init__()
         if out_stride not in [16, 32]:
             raise ValueError(f'out_stride must 16 or 32, got {out_stride}')
 
@@ -418,6 +419,7 @@ class IndexNetEncoder(nn.Module):
 
         # build index blocks
         self.index_layers = nn.ModuleList()
+        #inverted_residual_setting[2][1] -= 24
         for layer in self.downsampled_layers:
             # inverted_residual_setting begins at layer1, the in_channels
             # of layer1 is the out_channels of layer0
@@ -425,6 +427,7 @@ class IndexNetEncoder(nn.Module):
                 index_block(inverted_residual_setting[layer][1], norm_cfg,
                             use_context, use_nonlinear))
         self.avg_pool = nn.AvgPool2d(2, stride=2)
+        self.enc_mask = ConvModule(1, 24, 3, stride=1, padding=1, norm_cfg=norm_cfg, act_cfg=dict(type='Sigmoid'))
 
         if aspp:
             dilation = (2, 4, 8) if out_stride == 32 else (6, 12, 18)
@@ -509,12 +512,19 @@ class IndexNetEncoder(nn.Module):
         dec_idx_feat_list = list()
         shortcuts = list()
         ori_input = x.clone()
+        mask = x[:, 3:4, :, :].clone()
+        r = x[:, 0:1, :, :].clone()
+        g = x[:, 1:2, :, :].clone()
+        b = x[:, 2:3, :, :].clone()
+        x = torch.cat((r,g,b), dim=1)
         for i, layer in enumerate(self.layers):
             x = layer(x)
             if i in self.downsampled_layers:
                 enc_idx_feat, dec_idx_feat = self.index_layers[
                     self.downsampled_layers.index(i)](
                         x)
+                enc_idx_feat = enc_idx_feat.squeeze()
+                dec_idx_feat = dec_idx_feat.squeeze()
                 x = enc_idx_feat * x
                 shortcuts.append(x)
                 dec_idx_feat_list.append(dec_idx_feat)
@@ -524,6 +534,9 @@ class IndexNetEncoder(nn.Module):
                 dec_idx_feat_list.append(None)
             if i == 2:
                 neck_in = x.clone()
+                mask = F.interpolate(mask, scale_factor=0.25, mode='bilinear', align_corners=False)
+                mask = self.enc_mask(mask)
+                x = mask * x
 
         x = self.dconv(x)
 

@@ -136,6 +136,83 @@ class GenerateTrimap(object):
                      f'random={self.random})')
         return repr_str
 
+@PIPELINES.register_module()
+class GenerateTrimapFromMask(object):
+    def __init__(self, kernel_size, iterations=1, random=True):
+        if isinstance(kernel_size, int):
+            kernel_size = kernel_size, kernel_size + 1
+        elif not mmcv.is_tuple_of(kernel_size, int) or len(kernel_size) != 2:
+            raise ValueError('kernel_size must be an int or a tuple of 2 int, '
+                             f'but got {kernel_size}')
+
+        if isinstance(iterations, int):
+            iterations = iterations, iterations + 1
+        elif not mmcv.is_tuple_of(iterations, int) or len(iterations) != 2:
+            raise ValueError('iterations must be an int or a tuple of 2 int, '
+                             f'but got {iterations}')
+
+        self.random = random
+        if self.random:
+            min_kernel, max_kernel = kernel_size
+            self.iterations = iterations
+            self.kernels = [
+                cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (size, size))
+                for size in range(min_kernel, max_kernel)
+            ]
+        else:
+            erode_ksize, dilate_ksize = kernel_size
+            self.iterations = iterations
+            self.kernels = [
+                cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
+                                          (erode_ksize, erode_ksize)),
+                cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
+                                          (dilate_ksize, dilate_ksize))
+            ]
+        self.noise_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+        
+
+    def __call__(self, results):
+        """Call function.
+
+        Args:
+            results (dict): A dict containing the necessary information and
+                data for augmentation.
+
+        Returns:
+            dict: A dict containing the processed data and information.
+        """
+        mask = (results['alpha'] > 128).astype(np.uint8)
+        mask = cv2.dilate(mask, self.noise_kernel, iterations=1)
+        mask = cv2.erode(mask, self.noise_kernel, iterations=1)
+
+        if self.random:
+            kernel_num = len(self.kernels)
+            erode_kernel_idx = np.random.randint(kernel_num)
+            dilate_kernel_idx = np.random.randint(kernel_num)
+            min_iter, max_iter = self.iterations
+            erode_iter = np.random.randint(min_iter, max_iter)
+            dilate_iter = np.random.randint(min_iter, max_iter)
+        else:
+            erode_kernel_idx, dilate_kernel_idx = 0, 1
+            erode_iter, dilate_iter = self.iterations
+
+        eroded = cv2.erode(
+            mask, self.kernels[erode_kernel_idx], iterations=erode_iter)
+        dilated = cv2.dilate(
+            mask, self.kernels[dilate_kernel_idx], iterations=dilate_iter)
+
+        trimap = np.zeros_like(mask)
+        trimap.fill(128)
+        trimap[eroded >= 1] = 255
+        trimap[dilated <= 0] = 0
+        results['trimap'] = trimap.astype(np.float32)
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += (f'(kernels={self.kernels}, iterations={self.iterations}, '
+                     f'random={self.random})')
+        return repr_str
 
 @PIPELINES.register_module()
 class GenerateTrimapWithDistTransform(object):
@@ -188,6 +265,62 @@ class GenerateTrimapWithDistTransform(object):
         repr_str += f'(dist_thr={self.dist_thr}, random={self.random})'
         return repr_str
 
+@PIPELINES.register_module()
+class GenerateMaskFromAlpha(object):
+    def __init__(self, kernel_size, ep=0.01, iterations=1, random=True):
+        if isinstance(iterations, int):
+            iterations = iterations, iterations + 1
+        self.random = random
+        self.ep = ep
+        if self.random:
+            min_kernel, max_kernel = kernel_size
+            self.iterations = iterations
+            self.kernels = [
+                cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (size, size))
+                for size in range(min_kernel, max_kernel)
+            ]
+        else:
+            erode_ksize, dilate_ksize = kernel_size
+            self.iterations = iterations
+            self.kernels = [
+                cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
+                                          (erode_ksize, erode_ksize)),
+                cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
+                                          (dilate_ksize, dilate_ksize))
+            ]
+        self.boundary_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+
+    def __call__(self, results):
+        alpha = results['alpha']
+        mask = (alpha > 0.5).astype(np.uint8)
+        #if "st_hair_1" in results['alpha_path']:
+        #    mask = cv2.imread(results['alpha_path'].replace('/alpha/', '/hair_mask/'))
+        if self.random:
+            kernel_num = len(self.kernels)
+            erode_kernel_idx = np.random.randint(kernel_num)
+            dilate_kernel_idx = np.random.randint(kernel_num)
+            min_iter, max_iter = self.iterations
+            erode_iter = np.random.randint(min_iter, max_iter)
+            dilate_iter = np.random.randint(min_iter, max_iter)
+        else:
+            erode_kernel_idx, dilate_kernel_idx = 0, 1
+            erode_iter, dilate_iter = self.iterations
+        if np.random.random() < 0.5:
+            mask = cv2.dilate(
+                mask, self.kernels[dilate_kernel_idx], iterations=dilate_iter)
+            mask = cv2.erode(
+                mask, self.kernels[erode_kernel_idx], iterations=erode_iter)
+        else:
+            mask = cv2.erode(
+                mask, self.kernels[erode_kernel_idx], iterations=erode_iter)
+            mask = cv2.dilate(
+                mask, self.kernels[dilate_kernel_idx], iterations=dilate_iter)
+       
+        results['mask'] = mask
+        local_mask = (np.abs(mask - np.squeeze(alpha)) > self.ep).astype(np.uint8)
+        local_mask = cv2.dilate(local_mask, self.boundary_kernel, 1)
+        results['local_mask'] = local_mask
+        return results
 
 @PIPELINES.register_module()
 class CompositeFg(object):
