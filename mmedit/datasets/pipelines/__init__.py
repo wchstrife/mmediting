@@ -1,18 +1,18 @@
 from .augmentation import (BinarizeImage, Flip, GenerateFrameIndices,
                            GenerateFrameIndiceswithPadding, Pad, RandomAffine,
                            RandomJitter, RandomMaskDilation, RandomTransposeHW,
-                           Resize, TemporalReverse, ScaleInput)
+                           Resize, TemporalReverse, ScaleInput, ResizeForShorterSide)
 from .compose import Compose
-from .crop import (Crop, CropAroundCenter, CropAroundFg, CropAroundUnknown,
+from .crop import (Crop, CropAroundCenter, CropAroundFg, CropAroundUnknown, CropBboxFromAlpha,
                    FixedCrop, ModCrop, PairedRandomCrop)
 from .formating import (Collect, FormatTrimap, GetMaskedImage, ImageToTensor,
                         ToTensor, FormatTrimap2Channel, FormatTrimap6Channel)
 from .loading import (GetSpatialDiscountMask, LoadImageFromFile,
                       LoadImageFromFileList, LoadMask, LoadPairedImageFromFile,
                       RandomLoadResizeBg, CopyImage)
-from .matting_aug import (CompositeFg, GenerateSeg, GenerateSoftSeg,
+from .matting_aug import (CompositeFg, GenerateSeg, GenerateSoftSeg, GenerateTrimapFromMask,
                           GenerateTrimap, GenerateTrimapWithDistTransform,
-                          MergeFgAndBg, PerturbBg)
+                          MergeFgAndBg, PerturbBg, GenerateMaskFromAlpha)
 from .normalization import Normalize, RescaleToZeroOne, GroupNoraliseImage
 
 __all__ = [
@@ -26,5 +26,7 @@ __all__ = [
     'GenerateFrameIndices', 'GenerateFrameIndiceswithPadding', 'FixedCrop',
     'LoadPairedImageFromFile', 'GenerateSoftSeg', 'GenerateSeg', 'PerturbBg',
     'CropAroundFg', 'GetSpatialDiscountMask', 'GenerateTrimapWithDistTransform',
-    'FormatTrimap2Channel', 'FormatTrimap6Channel', 'ScaleInput', 'GroupNoraliseImage', 'CopyImage'
+    'ResizeForShorterSide', 'GenerateTrimapFromMask', 'GenerateMaskFromAlpha',
+    'CropBboxFromAlpha', 'FormatTrimap2Channel', 'FormatTrimap6Channel',
+    'ScaleInput', 'GroupNoraliseImage', 'CopyImage'
 ]

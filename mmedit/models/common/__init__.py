@@ -1,4 +1,5 @@
 from .aspp import ASPP
+from .aspp_caffe import ASPP_CAFFE
 from .contextual_attention import ContextualAttentionModule
 from .conv import *  # noqa: F401, F403
 from .flow_warp import flow_warp
@@ -18,7 +19,7 @@ from .sr_backbone_utils import (ResidualBlockNoBN, default_init_weights,
 from .upsample import PixelShufflePack
 
 __all__ = [
-    'ASPP', 'PartialConv2d', 'PixelShufflePack', 'default_init_weights',
+    'ASPP', 'ASPP_CAFFE', 'PartialConv2d', 'PixelShufflePack', 'default_init_weights',
     'ResidualBlockNoBN', 'make_layer', 'MaskConvModule', 'extract_bbox_patch',
     'extract_around_bbox', 'set_requires_grad', 'scale_bbox',
     'DepthwiseSeparableConvModule', 'ContextualAttentionModule', 'GCAModule',
