@@ -5,6 +5,7 @@ import mmcv
 import torch
 from mmcv.parallel import MMDataParallel
 from mmcv.runner import get_dist_info, init_dist, load_checkpoint
+
 from mmedit.apis import multi_gpu_test, set_random_seed, single_gpu_test
 from mmedit.core.distributed_wrapper import DistributedDataParallelWrapper
 from mmedit.datasets import build_dataloader, build_dataset
@@ -112,12 +113,11 @@ def main():
             save_image=args.save_image)
 
     if rank == 0:
-        print('')
         # print metrics
         stats = dataset.evaluate(outputs)
         for stat in stats:
             print('Eval-{}: {}'.format(stat, stats[stat]))
-
+            
         # save result pickle
         if args.out:
             print('writing results to {}'.format(args.out))

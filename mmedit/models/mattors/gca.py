@@ -1,4 +1,5 @@
 import torch
+from mmcv.runner import auto_fp16
 
 from ..builder import build_loss
 from ..registry import MODELS
@@ -32,7 +33,10 @@ class GCA(BaseMattor):
         super(GCA, self).__init__(backbone, None, train_cfg, test_cfg,
                                   pretrained)
         self.loss_alpha = build_loss(loss_alpha)
+        # support fp16
+        self.fp16_enabled = False
 
+    @auto_fp16(apply_to=('x', ))
     def _forward(self, x):
         raw_alpha = self.backbone(x)
         pred_alpha = (raw_alpha.tanh() + 1.0) / 2.0
@@ -91,8 +95,7 @@ class GCA(BaseMattor):
             dict: Contains the predicted alpha and evaluation result.
         """
         pred_alpha = self._forward(torch.cat((merged, trimap), 1))
-
-        pred_alpha = pred_alpha.cpu().numpy().squeeze()
+        pred_alpha = pred_alpha.detach().cpu().numpy().squeeze()
         pred_alpha = self.restore_shape(pred_alpha, meta)
         eval_result = self.evaluate(pred_alpha, meta)
 

@@ -1,4 +1,5 @@
 import torch
+from mmcv.runner import auto_fp16
 
 from ..builder import build_loss
 from ..registry import MODELS
@@ -58,6 +59,10 @@ class DIM(BaseMattor):
         if loss_refine is not None:
             self.loss_refine = build_loss(loss_refine)
 
+        # support fp16
+        self.fp16_enabled = False
+
+    @auto_fp16()
     def _forward(self, x, refine):
         raw_alpha = self.backbone(x)
         pred_alpha = raw_alpha.sigmoid()
@@ -66,8 +71,9 @@ class DIM(BaseMattor):
             refine_input = torch.cat((x[:, :3, :, :], pred_alpha), 1)
             pred_refine = self.refiner(refine_input, raw_alpha)
         else:
-            pred_refine = None
-
+            # As ONNX does not support NoneType for output,
+            # we choose to use zero tensor to represent None
+            pred_refine = torch.zeros([])
         return pred_alpha, pred_refine
 
     def forward_dummy(self, inputs):
@@ -143,7 +149,7 @@ class DIM(BaseMattor):
         if self.test_cfg.refine:
             pred_alpha = pred_refine
 
-        pred_alpha = pred_alpha.cpu().numpy().squeeze()
+        pred_alpha = pred_alpha.detach().cpu().numpy().squeeze()
         pred_alpha = self.restore_shape(pred_alpha, meta)
         eval_result = self.evaluate(pred_alpha, meta)
 

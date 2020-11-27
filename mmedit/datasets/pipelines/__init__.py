@@ -1,19 +1,19 @@
 from .augmentation import (BinarizeImage, Flip, GenerateFrameIndices,
                            GenerateFrameIndiceswithPadding, Pad, RandomAffine,
                            RandomJitter, RandomMaskDilation, RandomTransposeHW,
-                           Resize, TemporalReverse)
+                           Resize, TemporalReverse, ScaleInput)
 from .compose import Compose
 from .crop import (Crop, CropAroundCenter, CropAroundFg, CropAroundUnknown,
                    FixedCrop, ModCrop, PairedRandomCrop)
 from .formating import (Collect, FormatTrimap, GetMaskedImage, ImageToTensor,
-                        ToTensor)
+                        ToTensor, FormatTrimap2Channel, FormatTrimap6Channel)
 from .loading import (GetSpatialDiscountMask, LoadImageFromFile,
                       LoadImageFromFileList, LoadMask, LoadPairedImageFromFile,
-                      RandomLoadResizeBg)
+                      RandomLoadResizeBg, CopyImage)
 from .matting_aug import (CompositeFg, GenerateSeg, GenerateSoftSeg,
                           GenerateTrimap, GenerateTrimapWithDistTransform,
                           MergeFgAndBg, PerturbBg)
-from .normalization import Normalize, RescaleToZeroOne
+from .normalization import Normalize, RescaleToZeroOne, GroupNoraliseImage
 
 __all__ = [
     'Collect', 'FormatTrimap', 'LoadImageFromFile', 'LoadMask',
@@ -25,5 +25,6 @@ __all__ = [
     'MergeFgAndBg', 'CompositeFg', 'TemporalReverse', 'LoadImageFromFileList',
     'GenerateFrameIndices', 'GenerateFrameIndiceswithPadding', 'FixedCrop',
     'LoadPairedImageFromFile', 'GenerateSoftSeg', 'GenerateSeg', 'PerturbBg',
-    'CropAroundFg', 'GetSpatialDiscountMask', 'GenerateTrimapWithDistTransform'
+    'CropAroundFg', 'GetSpatialDiscountMask', 'GenerateTrimapWithDistTransform',
+    'FormatTrimap2Channel', 'FormatTrimap6Channel', 'ScaleInput', 'GroupNoraliseImage', 'CopyImage'
 ]

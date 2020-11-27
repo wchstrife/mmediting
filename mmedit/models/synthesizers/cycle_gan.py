@@ -4,8 +4,9 @@ import mmcv
 import numpy as np
 import torch.nn as nn
 from mmcv.parallel import MMDistributedDataParallel
-from mmedit.core import tensor2img
+from mmcv.runner import auto_fp16
 
+from mmedit.core import tensor2img
 from ..base import BaseModel
 from ..builder import build_backbone, build_component, build_loss
 from ..common import GANImageBuffer, set_requires_grad
@@ -114,6 +115,9 @@ class CycleGAN(BaseModel):
                 self.test_direction = ('b2a' if self.test_direction == 'a2b'
                                        else 'a2b')
 
+        # support fp16
+        self.fp16_enabled = False
+
         self.init_weights(pretrained)
 
     def init_weights(self, pretrained=None):
@@ -162,6 +166,7 @@ class CycleGAN(BaseModel):
 
         return real_a, real_b, image_path
 
+    @auto_fp16(apply_to=('img_a', 'img_b'))
     def forward_train(self, img_a, img_b, meta):
         """Forward function for training.
 

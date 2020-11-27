@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
 from mmcv.cnn import constant_init, normal_init
-from mmcv.runner import load_checkpoint
+from mmcv.runner import auto_fp16, load_checkpoint
 from mmcv.utils.parrots_wrapper import _BatchNorm
+
 from mmedit.models.builder import build_backbone, build_component
 from mmedit.models.registry import BACKBONES
 from mmedit.utils import get_root_logger
@@ -41,6 +42,10 @@ class DeepFillEncoderDecoder(nn.Module):
 
         self.return_offset = return_offset
 
+        # support fp16
+        self.fp16_enabled = False
+
+    @auto_fp16()
     def forward(self, x):
         """Forward function.
 
