@@ -73,3 +73,44 @@ def matting_inference(model, img, trimap):
         result = model(test_mode=True, **data)
 
     return result['pred_alpha']
+
+def matting_inference_file(model, img, trimap=None, mask=None, image_path="input file directly"):
+    """Inference image(s) with the model.
+
+    Args:
+        model (nn.Module): The loaded model.
+        img (str): Image file path.
+        trimap (str): Trimap file path.
+
+    Returns:
+        np.ndarray: The predicted alpha matte.
+    """
+    assert trimap is not None or mask is not None
+    cfg = model.cfg
+    device = next(model.parameters()).device  # model device
+    # remove alpha from test_pipeline
+    keys_to_remove = ['alpha', 'ori_alpha']
+    for key in keys_to_remove:
+        for pipeline in list(cfg.test_pipeline):
+            if 'key' in pipeline and key == pipeline['key']:
+                cfg.test_pipeline.remove(pipeline)
+            if 'keys' in pipeline and key in pipeline['keys']:
+                pipeline['keys'].remove(key)
+                if len(pipeline['keys']) == 0:
+                    cfg.test_pipeline.remove(pipeline)
+            if 'meta_keys' in pipeline and key in pipeline['meta_keys']:
+                pipeline['meta_keys'].remove(key)
+    # build the data pipeline
+    test_pipeline = cfg.test_pipeline[2:]
+    test_pipeline = Compose(test_pipeline)
+    # prepare data
+    data = dict(merged=img, mask=mask, ori_mask=mask,
+                trimap=trimap, ori_trimap=trimap, ori_merged=img.copy(),
+                merged_path=image_path, merged_ori_shape=img.shape)
+
+    data = test_pipeline(data)
+    data = scatter(collate([data], samples_per_gpu=1), [device])[0]
+    # forward the model
+    with torch.no_grad():
+        result = model(test_mode=True, **data)
+    return result

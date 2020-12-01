@@ -7,7 +7,8 @@ from .components import *  # noqa: F401, F403
 from .inpaintors import (DeepFillv1Inpaintor, GLInpaintor, OneStageInpaintor,
                          PConvInpaintor, TwoStageInpaintor)
 from .losses import *  # noqa: F401, F403
-from .mattors import DIM, GCA, BaseMattor, IndexNet, FBA
+from .mattors import (DIM, GCA, BaseMattor, IndexNet, FBA,
+                      InductiveFilterCascade, MaskMatting)
 from .registry import BACKBONES, COMPONENTS, LOSSES, MODELS
 from .restorers import ESRGAN, SRGAN, BasicRestorer
 from .synthesizers import CycleGAN, Pix2Pix
@@ -18,5 +19,5 @@ __all__ = [
     'BACKBONES', 'COMPONENTS', 'LOSSES', 'BaseMattor', 'DIM', 'MODELS',
     'GLInpaintor', 'PConvInpaintor', 'SRGAN', 'ESRGAN', 'GCA',
     'TwoStageInpaintor', 'IndexNet', 'DeepFillv1Inpaintor', 'Pix2Pix',
-    'CycleGAN', 'FBA'
+    'CycleGAN', 'InductiveFilterCascade', 'MaskMatting', 'FBA'
 ]
