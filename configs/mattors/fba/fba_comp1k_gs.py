@@ -16,7 +16,7 @@ test_cfg = dict(metrics=['SAD', 'MSE', 'GRAD', 'CONN'])
 
 # dataset settings
 dataset_type = 'AdobeComp1kDataset'
-data_root = '/mnt/lustre/share/3darseg/segmentation/matting/'
+data_root = '/mnt/lustre/share/3darseg/segmentation/matting/green_matting/'
 img_norm_cfg = dict(
     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], format='chw')
 
@@ -77,17 +77,17 @@ data = dict(
     drop_last=False,
     train=dict(
         type=dataset_type,
-        ann_file=data_root + 'adobe/adobe_train.json',
+        ann_file=data_root + 'Data_adobe_GS/list/train.json',
         data_prefix=data_root,
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        ann_file=data_root + 'adobe/adobe_val.json',
+        ann_file=data_root + 'Data_adobe_GS/list/test_trimap.json',
         data_prefix=data_root,
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'adobe/adobe_val.json',
+        ann_file=data_root + 'Data_adobe_GS/list/test_trimap.json',
         data_prefix=data_root,
         pipeline=test_pipeline))
 

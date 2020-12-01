@@ -145,6 +145,37 @@ class Resize(object):
             f'max_size={self.max_size},interpolation={self.interpolation})')
         return repr_str
 
+@PIPELINES.register_module()
+class ResizeForShorterSide(object):
+    def __init__(self,
+                 keys=['alpha', 'merged'],
+                 shortsize=600,
+                 interpolation='bilinear'):
+        assert keys, 'Keys should not be empty.'
+        self.keys = keys
+        self.shortsize = shortsize
+        self.interpolation = interpolation
+
+    def _resize(self, img):
+        img, w_scale, h_scale = mmcv.imresize(
+                img,
+                self.scale,
+                return_scale=True,
+                interpolation=self.interpolation)
+        self.scale_factor = np.array((w_scale, h_scale), dtype=np.float32)
+        return img
+
+    def __call__(self, results):
+        h, w = results[self.keys[0]].shape[:2]
+        scale_factor = self.shortsize / min(h, w)
+        self.scale = (int(w*scale_factor), int(h*scale_factor))
+        for key in self.keys:
+            results[key] = self._resize(results[key])
+            if len(results[key].shape) == 2:
+                results[key] = np.expand_dims(results[key], axis=2)
+        results['scale_factor'] = self.scale_factor
+        results['interpolation'] = self.interpolation
+        return results
 
 @PIPELINES.register_module()
 class Flip(object):
