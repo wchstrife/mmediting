@@ -88,10 +88,8 @@ class RescaleToZeroOne(object):
                     v.astype(np.float32) / 255. for v in results[key]
                 ]
             else:
-                # results[key] = results[key].astype(np.float32) / 255.
-                results[key] = results[key] / 255.0
-                #results[key].tofile(f'/home2/wangchenhao/mmediting/dat/{key}_divide_64.dat')
-                #results[key].astype(np.float64).tofile(f'/home2/wangchenhao/mmediting/dat/{key}_resacle_64.dat') # BUG：精度有问题
+                results[key] = results[key].astype(np.float32) / 255.
+                #results[key] = results[key] / 255.0
         return results
 
     def __repr__(self):
