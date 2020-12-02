@@ -29,6 +29,7 @@ class PatchDiscriminator(nn.Module):
                  in_channels,
                  base_channels=64,
                  num_conv=3,
+                 with_spectral_norm=False,
                  norm_cfg=dict(type='BN'),
                  init_cfg=dict(type='normal', gain=0.02)):
         super(PatchDiscriminator, self).__init__()
@@ -52,7 +53,8 @@ class PatchDiscriminator(nn.Module):
                 padding=padding,
                 bias=True,
                 norm_cfg=None,
-                act_cfg=dict(type='LeakyReLU', negative_slope=0.2))
+                act_cfg=dict(type='LeakyReLU', negative_slope=0.2),
+                with_spectral_norm=with_spectral_norm)
         ]
 
         # stacked intermediate layers,
@@ -71,7 +73,8 @@ class PatchDiscriminator(nn.Module):
                     padding=padding,
                     bias=use_bias,
                     norm_cfg=norm_cfg,
-                    act_cfg=dict(type='LeakyReLU', negative_slope=0.2))
+                    act_cfg=dict(type='LeakyReLU', negative_slope=0.2),
+                    with_spectral_norm=with_spectral_norm)
             ]
         multiple_prev = multiple_now
         multiple_now = min(2**num_conv, 8)
@@ -84,7 +87,8 @@ class PatchDiscriminator(nn.Module):
                 padding=padding,
                 bias=use_bias,
                 norm_cfg=norm_cfg,
-                act_cfg=dict(type='LeakyReLU', negative_slope=0.2))
+                act_cfg=dict(type='LeakyReLU', negative_slope=0.2),
+                with_spectral_norm=with_spectral_norm)
         ]
 
         # output one-channel prediction map
