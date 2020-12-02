@@ -374,7 +374,7 @@ class CompositeFg(object):
         alpha = results['alpha'].astype(np.float32) / 255.
         h, w = results['fg'].shape[:2]
 
-        # randomly select fg
+        # randomly select fgF
         if np.random.rand() < 0.5:
             idx = np.random.randint(len(self.fg_list))
             fg2 = mmcv.imread(self.fg_list[idx])

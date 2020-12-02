@@ -6,9 +6,20 @@ model = dict(
         type='FBAEncoderDecoder',
         encoder=dict(type='FBAEncoder', in_channels=11, block='resnet50_GN_WS'),
         decoder=dict(type='FBADecoder')),
+
     pretrained=None,
-    loss_alpha=dict(type='CharbonnierLoss', loss_weight=0.5),
-    loss_comp=dict(type='CharbonnierCompLoss', loss_weight=0.5)
+
+    loss_alpha_l1=dict(type='L1Loss', loss_weight=1),
+    loss_alpha_comp=dict(type='L1CompositionLoss', loss_weight=1),
+    loss_alpha_grad=dict(type='GradientLoss', loss_weight=1),
+    loss_alpha_lap=dict(type='LaplacianLoss', loss_weight=1),
+
+    loss_f_l1=dict(type='L1Loss', loss_weight=0.25),
+    loss_b_l1=dict(type='L1Loss', loss_weight=0.25),
+    loss_fb_excl=dict(type='GradientExclusionLoss', loss_weight=0.25),
+    loss_fb_comp=dict(type='L1CompositionLoss', loss_weight=0.25),
+    loss_f_lap=dict(type='LaplacianLoss', loss_weight=0.25),
+    loss_b_lap=dict(type='LaplacianLoss', loss_weight=0.25)
 )
     
 train_cfg = dict(train_backbone=True)
@@ -18,13 +29,55 @@ test_cfg = dict(metrics=['SAD', 'MSE', 'GRAD', 'CONN'])
 dataset_type = 'AdobeComp1kDataset'
 data_root = '/mnt/lustre/share/3darseg/segmentation/matting/'
 img_norm_cfg = dict(
-    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], format='chw')
+    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], to_rgb=True)
 
 train_pipeline = [
+    dict(type='LoadImageFromFile', key='alpha', flag='grayscale'),
+    dict(type='LoadImageFromFile', key='fg'),
+    dict(type='LoadImageFromFile', key='bg'),
+    dict(type='LoadImageFromFile', key='merged', save_original_img=True),
+
+    dict(                       # 到时候换成更换后的FG
+        type='CompositeFg',
+        fg_dirs=[
+            data_root + 'Combined_Dataset/Training_set/Adobe-licensed images/fg',
+            data_root + 'Combined_Dataset/Training_set/Other/fg'
+        ],
+        alpha_dirs=[
+            data_root + 'Combined_Dataset/Training_set/Adobe-licensed images/alpha',
+            data_root + 'Combined_Dataset/Training_set/Other/alpha'
+        ]),    
+
+    dict(
+        type='CropAroundUnknown',
+        keys=['alpha', 'merged', 'ori_merged', 'fg', 'bg'],
+        crop_sizes=[320, 480, 640]),
+    dict(type='Flip', keys=['alpha', 'merged', 'ori_merged', 'fg', 'bg']),
+    dict(
+        type='Resize',
+        keys=['alpha', 'merged', 'ori_merged', 'fg', 'bg'],
+        scale=(320, 320),
+        keep_ratio=False),
+    dict(type='GenerateTrimap', kernel_size=(3, 25)),
+    dict(
+        type='RescaleToZeroOne',
+        keys=['merged', 'alpha', 'ori_merged', 'fg', 'bg', 'trimap']),
+    
+
+    dict(type='Normalize', keys=['merged'], **img_norm_cfg),
+    dict(
+        type='Collect',
+        keys=['merged', 'alpha', 'trimap', 'ori_merged', 'fg', 'bg'],
+        meta_keys=[]),
+    dict(
+        type='ImageToTensor',
+        keys=['merged', 'alpha', 'trimap', 'ori_merged', 'fg', 'bg']),    
+    
+
+
 ]
 
 test_pipeline = [
-
     dict(
         type='LoadImageFromFile',
         key='alpha',
@@ -57,7 +110,7 @@ test_pipeline = [
     dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
 
     dict(type='ImageToTensor', keys=['merged']),
-    dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg),
+    dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
 
     dict(
         type='Collect',

@@ -132,3 +132,38 @@ class GradientLoss(nn.Module):
             l1_loss(
                 pred_grad_y, target_grad_y, weight, reduction=self.reduction))
         return loss * self.loss_weight
+
+@LOSSES.register_module()
+class GradientExclusionLoss(nn.Module):
+    """Gradient Exclusion Loss.
+
+    Args:
+        loss_weight (float): Loss weight for L1 loss. Default: 1.0.
+    """
+
+    def __init__(self, loss_weight=1.0):
+        super(GradientExclusionLoss, self).__init__()
+        self.loss_weight = loss_weight
+
+    def forward(self, fg, bg):
+        """
+        Args:
+            fg (Tensor): of shape (N, C, H, W). FG tensor.
+            bg (Tensor): of shape (N, C, H, W). BG tensor.
+        """
+        kx = torch.Tensor([[1, 0, -1], [2, 0, -2],
+                           [1, 0, -1]]).view(1, 1, 3, 3).to(bg)
+        ky = torch.Tensor([[1, 2, 1], [0, 0, 0],
+                           [-1, -2, -1]]).view(1, 1, 3, 3).to(bg)
+
+        fg_grad_x = F.conv2d(fg, kx, padding=1)
+        fg_grad_y = F.conv2d(fg, ky, padding=1)
+        bg_grad_x = F.conv2d(bg, kx, padding=1)
+        bg_grad_y = F.conv2d(bg, ky, padding=1)
+
+        fg_grad = torch.abs(fg_grad_x) + torch.abs(fg_grad_y)
+        bg_grad = torch.abs(bg_grad_x) + torch.abs(bg_grad_y)
+
+        loss = torch.sum(fg_grad.mul(bg_grad))
+
+        return loss * self.loss_weight

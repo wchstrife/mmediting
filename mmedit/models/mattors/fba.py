@@ -12,13 +12,52 @@ from .base_mattor import BaseMattor
 class FBA(BaseMattor):
 
 
-    def __init__(self, backbone, train_cfg=None, test_cfg=None, pretrained=None, loss_alpha=None, loss_comp=None):
+    def __init__(self,
+                backbone, 
+                train_cfg=None, 
+                test_cfg=None, 
+                pretrained=None, 
+                loss_alpha_l1=None,
+                loss_alpha_comp=None,
+                loss_alpha_grad=None,
+                loss_alpha_lap=None,
+                loss_f_l1=None,
+                loss_b_l1=None,
+                loss_fb_excl=None,
+                loss_fb_comp=None,
+                loss_f_lap=None,
+                loss_b_lap=None
+                ):
         super(FBA, self).__init__(backbone, None, train_cfg, test_cfg, pretrained)
+        
+        if all(v is None for v in (loss_alpha_l1,
+                                    loss_alpha_comp,
+                                    loss_alpha_grad,
+                                    loss_alpha_lap,
+                                    loss_f_l1,
+                                    loss_b_l1,
+                                    loss_fb_excl,
+                                    loss_fb_comp,
+                                    loss_f_lap,
+                                    loss_b_lap
+                                    )):
+            raise ValueError('Please specify one loss for FBA.')
 
-        # TODO: 添加其他Loss
-        self.loss_alpha = (build_loss(loss_alpha) if loss_alpha is not None else None)
-        self.loss_comp = (build_loss(loss_comp) if loss_comp is not None else None)
+        self.loss_alpha_l1 = (build_loss(loss_alpha_l1) if loss_alpha_l1 is not None else None)
+        self.loss_alpha_comp = (build_loss(loss_alpha_comp) if loss_alpha_comp is not None else None)   
+        self.loss_alpha_grad = (build_loss(loss_alpha_grad) if loss_alpha_grad is not None else None)
+        self.loss_alpha_lap = (build_loss(loss_alpha_lap) if loss_alpha_lap is not None else None)     
+        self.loss_f_l1 = (build_loss(loss_f_l1) if loss_f_l1 is not None else None)
+        self.loss_b_l1 = (build_loss(loss_b_l1) if loss_b_l1 is not None else None)   
+        self.loss_fb_excl = (build_loss(loss_fb_excl) if loss_fb_excl is not None else None)
+        self.loss_fb_comp = (build_loss(loss_fb_comp) if loss_fb_comp is not None else None)
+        self.loss_f_lap = (build_loss(loss_f_lap) if loss_f_lap is not None else None)
+        self.loss_b_lap = (build_loss(loss_b_lap) if loss_b_lap is not None else None) 
 
+         # support fp16
+        self.fp16_enabled = False                 
+        
+        
     def forward_dummy(self, inputs):
         return self.backbone(inputs)
 
@@ -48,11 +87,7 @@ class FBA(BaseMattor):
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
 
-        # result.cpu().numpy().tofile('/home2/wangchenhao/mmediting/dat/result_before_reshape.dat')
-
-        result = self.restore_shape(result, meta) # TODO: 将这里封装进restore_shape
-
-        # result.tofile('/home2/wangchenhao/mmediting/dat/result_after_reshape.dat')
+        result = self.restore_shape(result, meta) 
 
         pred_alpha = result[:, :, 0]
         fg = result[:, :, 1:4]
@@ -62,7 +97,6 @@ class FBA(BaseMattor):
         pred_alpha[ori_trimap[:, :, 0] == 1] = 0
         pred_alpha[ori_trimap[:, :, 1] == 1] = 1
 
-        # pred_alpha.tofile('/home2/wangchenhao/mmediting/dat/pred.dat')
         # fg[alpha == 1] = image_np[alpha == 1] # TODO: 需要返回fg和bg时，需要用到merge_np，也就是ori_merge，但是在这里的实现已经经过了插值，改变的话需要重写norm层保留下来原来的ori_merged
         # bg[alpha == 0] = image_np[alpha == 0]
 
