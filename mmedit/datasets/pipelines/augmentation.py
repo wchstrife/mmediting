@@ -8,6 +8,7 @@ import mmcv
 import numpy as np
 
 from ..registry import PIPELINES
+from .utils import adjust_gamma
 
 
 @PIPELINES.register_module()
@@ -955,3 +956,42 @@ class ScaleInput(object):
         repr_str = self.__class__.__name__
         repr_str += f'(keys={self.keys}, scale_type={self.scale_type})'
         return repr_str
+
+@PIPELINES.register_module()
+class RandomGamma(object):
+    """Randomly  gamma change to background image.
+
+    Required key is "bg", added key is "noisy_bg".
+
+    Args:
+        gamma_ratio (float, optional): The probability to use gamma correction
+            instead of gaussian noise. Defaults to 1.
+    """
+
+    def __init__(self, keys, gamma_ratio=0):
+        if gamma_ratio < 0 or gamma_ratio > 1:
+            raise ValueError('gamma_ratio must be a float between [0, 1], '
+                             f'but got {gamma_ratio}')
+        self.gamma_ratio = gamma_ratio
+        self.keys = keys
+
+    def __call__(self, results):
+        """Call function.
+
+        Args:
+            results (dict): A dict containing the necessary information and
+                data for augmentation.
+
+        Returns:
+            dict: A dict containing the processed data and information.
+        """
+        if np.random.rand() <= self.gamma_ratio:
+            # adjust gamma in a range of N(1, 0.12)
+            gamma = np.random.normal(1, 0.12)
+            for key in self.keys:
+                results[key] = adjust_gamma(results[key], gamma)
+
+        return results
+
+    def __repr__(self):
+        return self.__class__.__name__ + f'(gamma_ratio={self.gamma_ratio})'

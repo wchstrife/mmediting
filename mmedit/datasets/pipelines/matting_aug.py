@@ -39,6 +39,7 @@ class MergeFgAndBg(object):
         bg = results['bg']
         merged = fg * alpha + (1. - alpha) * bg
         results['merged'] = merged
+        results['ori_merged'] = merged
         return results
 
 
@@ -688,3 +689,4 @@ class GenerateSoftSeg(object):
                      f'dilate_iter_range={self.dilate_iter_range}, '
                      f'blur_ksizes={self.blur_ksizes})')
         return repr_str
+
