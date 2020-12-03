@@ -141,11 +141,15 @@ class GradientExclusionLoss(nn.Module):
         loss_weight (float): Loss weight for L1 loss. Default: 1.0.
     """
 
-    def __init__(self, loss_weight=1.0):
+    def __init__(self, loss_weight=1.0, reduction='mean'):
         super(GradientExclusionLoss, self).__init__()
         self.loss_weight = loss_weight
+        self.reduction = reduction
+        if self.reduction not in ['none', 'mean', 'sum']:
+            raise ValueError(f'Unsupported reduction mode: {self.reduction}. '
+                             f'Supported ones are: {_reduction_modes}')
 
-    def forward(self, fg, bg):
+    def forward(self, fg, bg, weight):
         """
         Args:
             fg (Tensor): of shape (N, C, H, W). FG tensor.
@@ -164,6 +168,9 @@ class GradientExclusionLoss(nn.Module):
         fg_grad = torch.abs(fg_grad_x) + torch.abs(fg_grad_y)
         bg_grad = torch.abs(bg_grad_x) + torch.abs(bg_grad_y)
 
-        loss = torch.sum(fg_grad.mul(bg_grad))
+        grad = fg_grad.mul(bg_grad)
+        zero = torch.zeros_like(grad).to(grad)
+
+        loss = l1_loss(grad, zero, weight, reduction=self.reduction)
 
         return loss * self.loss_weight

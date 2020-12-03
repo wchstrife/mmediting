@@ -77,13 +77,41 @@ class FBA(BaseMattor):
 
     # TODO: 添加训练代码
     def forward_train(self, merged, trimap, meta, alpha, ori_merged, fg, bg, trimap_transformed, trimap_1channel):
+
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
+        pred_alpha = result[:, 0, :, :]
+        pred_fg = result[:, 1:4, :, :]
+        pred_bg = result[:, 4:7, :, :]
 
-    # TODO： 添加参数注释
+        weight = get_unknown_tensor(trimap_1channel, meta)
+
+        losses = dict()
+
+        if self.loss_alpha_l1 is not None:
+            losses['loss_alpha_l1'] = self.loss_alpha_l1(pred_alpha, alpha, weight)
+        if self.loss_alpha_comp is not None:
+            losses['loss_alpha_comp'] = self.loss_alpha_comp(pred_alpha, fg, bg, ori_merged, weight)
+        if self.loss_alpha_grad is not None:
+            losses['loss_alpha_grad'] = self.loss_alpha_grad(pred_alpha, alpha, weight)
+        if self.loss_alpha_lap is not None:
+            losses['loss_alpha_lap'] = self.loss_alpha_lap(pred_alpha, alpha, weight)
+        if self.loss_f_l1 is not None:
+            losses['loss_f_l1'] = self.loss_f_l1(pred_fg, fg)
+        if self.loss_b_l1 is not None:
+            losses['loss_b_l1'] = self.loss_b_l1(pred_bg, bg, weight)
+        if self.loss_fb_excl is not None:
+            losses['loss_fb_excl'] = self.loss_fb_excl(pred_fg, pred_bg, weight)
+        if self.loss_fb_comp is not None:
+            losses['loss_fb_comp'] = self.loss_fb_comp(alpha, pred_fg, pred_bg, weight)
+        if self.loss_f_lap is not None:
+            losses['loss_f_lap'] = self.loss_f_lap(pred_fg, fg, weight)
+        if self.loss_b_lap is not None:
+            losses['loss_b_lap'] = self.loss_b_lap(pred_bg, bg, weight)
+        
+
+        return {'losses': losses, 'num_samples': merged.size(0)}            
+
     def forward_test(self, merged, trimap, meta, ori_merged, trimap_transformed, save_image=False, save_path=None, iteration=None):
-
-        # resnet_input = torch.cat((image_n, trimap_transformed, two_chan_trimap), 1)
-        # print(resnet_input.shape)
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
 
