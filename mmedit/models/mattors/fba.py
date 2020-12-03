@@ -79,9 +79,9 @@ class FBA(BaseMattor):
     def forward_train(self, merged, trimap, meta, alpha, ori_merged, fg, bg, trimap_transformed, trimap_1channel):
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
-        pred_alpha = result[:, 0, :, :]
-        pred_fg = result[:, 1:4, :, :]
-        pred_bg = result[:, 4:7, :, :]
+        pred_alpha = result[..., 0:1, :, :]
+        pred_fg = result[..., 1:4, :, :]
+        pred_bg = result[..., 4:7, :, :]
 
         weight = get_unknown_tensor(trimap_1channel, meta)
 
@@ -94,7 +94,7 @@ class FBA(BaseMattor):
         if self.loss_alpha_grad is not None:
             losses['loss_alpha_grad'] = self.loss_alpha_grad(pred_alpha, alpha, weight)
         if self.loss_alpha_lap is not None:
-            losses['loss_alpha_lap'] = self.loss_alpha_lap(pred_alpha, alpha, weight)
+            losses['loss_alpha_lap'] = self.loss_alpha_lap(pred_alpha, alpha) # 拉普拉斯暂时不考虑weight
         if self.loss_f_l1 is not None:
             losses['loss_f_l1'] = self.loss_f_l1(pred_fg, fg)
         if self.loss_b_l1 is not None:
