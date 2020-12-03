@@ -116,9 +116,10 @@ test_pipeline = [
 
     dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
 
-    dict(type='ImageToTensor', keys=['merged']),
     dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
-
+    
+    dict(type='ImageToTensor', keys=['merged']),
+    
     dict(
         type='Collect',
         keys=['ori_merged','trimap' , 'merged', 'trimap_transformed'],

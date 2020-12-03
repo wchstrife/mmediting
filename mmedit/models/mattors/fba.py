@@ -60,19 +60,19 @@ class FBA(BaseMattor):
     def forward_dummy(self, inputs):
         return self.backbone(inputs)
 
-    # def forward(self,
-    #             ori_merged,
-    #             trimap,
-    #             merged,
-    #             trimap_transformed,
-    #             meta,
-    #             alpha=None,
-    #             test_mode=False,
-    #             **kwargs):
-    #     if not test_mode:
-    #         return self.forward_train(merged, trimap, meta, alpha, **kwargs)
-    #     else:
-    #         return self.forward_test(ori_merged, trimap, merged, trimap_transformed, meta, **kwargs)
+    def forward(self,
+                ori_merged,
+                trimap,
+                merged,
+                trimap_transformed,
+                meta,
+                alpha=None,
+                test_mode=False,
+                **kwargs):
+        if not test_mode:
+            return self.forward_train(merged, trimap, meta, alpha, **kwargs)
+        else:
+            return self.forward_test(ori_merged, trimap, merged, trimap_transformed, meta, **kwargs)
 
     # TODO: 添加训练代码
     def forward_train(self, parameter_list):
