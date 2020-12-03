@@ -126,7 +126,7 @@ class GroupNoraliseImage(object):
         """
 
         for key in self.keys:
-            img = results[key].clone()
+            img = results[key]
             # img = img[None, :, :, :].float()
             # img.cpu().numpy().tofile('/home2/wangchenhao/mmediting/dat/before_norm.dat')
             if (format == 'hwc'):
