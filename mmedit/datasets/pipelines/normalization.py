@@ -107,11 +107,12 @@ class GroupNoraliseImage(object):
         std (np.ndarray): Std values of different channels.
     """
 
-    def __init__(self, keys, mean, std, format):
+    def __init__(self, keys, mean, std, format,to_rgb=False):
         self.keys = keys
         self.mean = np.array(mean, dtype=np.float32)
         self.std = np.array(std, dtype=np.float32)
         self.format = format
+        self.to_rgb = to_rgb
 
     def __call__(self, results):
         """Call function.
