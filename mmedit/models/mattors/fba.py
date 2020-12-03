@@ -6,6 +6,7 @@ import numpy as np
 from ..builder import build_loss
 from ..registry import MODELS
 from .base_mattor import BaseMattor
+from .utils import get_unknown_tensor
 
 
 @MODELS.register_module()
@@ -75,8 +76,8 @@ class FBA(BaseMattor):
     #         return self.forward_test(ori_merged, trimap, merged, trimap_transformed, meta, **kwargs)
 
     # TODO: 添加训练代码
-    def forward_train(self, parameter_list):
-        pass
+    def forward_train(self, merged, trimap, meta, alpha, ori_merged, fg, bg, trimap_transformed, trimap_1channel):
+        result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
 
     # TODO： 添加参数注释
     def forward_test(self, merged, trimap, meta, ori_merged, trimap_transformed, save_image=False, save_path=None, iteration=None):

@@ -277,6 +277,7 @@ class FormatTrimap2Channel(object):
         trimap_2C[trimap == 1, 1] = 1
         trimap_2C[trimap == 0, 0] = 1
         results[self.key] = trimap_2C
+        results[f'{self.key}_1channel'] = results[self.key]
 
         return results
 

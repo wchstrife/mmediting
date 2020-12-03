@@ -52,7 +52,7 @@ train_pipeline = [
     dict(type='RandomJitter'),  # 只针对fg
     dict(type='RandomGamma',keys=['fg', 'bg']),
 
-    dict(type='MergeFgAndBg'),
+    dict(type='MergeFgAndBg'),  # results['ori_merged']
 
     dict(
         type='CropAroundUnknown',
@@ -70,16 +70,16 @@ train_pipeline = [
         keys=['merged', 'alpha', 'ori_merged', 'fg', 'bg', 'trimap']),
     dict(type='Normalize', keys=['merged'], **img_norm_cfg),
 
-    dict(type='FormatTrimap2Channel', key='trimap'),
+    dict(type='FormatTrimap2Channel', key='trimap'), # results['trimap_1channel']
     dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
 
     dict(
         type='Collect',
-        keys=['merged', 'alpha', 'trimap', 'trimap_transformed', 'ori_merged', 'fg', 'bg'],
+        keys=['merged', 'alpha', 'trimap', 'trimap_transformed', 'ori_merged', 'fg', 'bg', 'trimap_1channel'],
         meta_keys=[]),
     dict(
         type='ImageToTensor',
-        keys=['merged', 'alpha', 'trimap', 'trimap_transformed', 'ori_merged', 'fg', 'bg']),    
+        keys=['merged', 'alpha', 'trimap', 'trimap_transformed', 'ori_merged', 'fg', 'bg', 'trimap_1channel']),    
     
 
 
