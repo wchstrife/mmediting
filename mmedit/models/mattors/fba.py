@@ -60,26 +60,26 @@ class FBA(BaseMattor):
     def forward_dummy(self, inputs):
         return self.backbone(inputs)
 
-    def forward(self,
-                ori_merged,
-                trimap,
-                merged,
-                trimap_transformed,
-                meta,
-                alpha=None,
-                test_mode=False,
-                **kwargs):
-        if not test_mode:
-            return self.forward_train(merged, trimap, meta, alpha, **kwargs)
-        else:
-            return self.forward_test(ori_merged, trimap, merged, trimap_transformed, meta, **kwargs)
+    # def forward(self,
+    #             ori_merged,
+    #             trimap,
+    #             merged,
+    #             trimap_transformed,
+    #             meta,
+    #             alpha=None,
+    #             test_mode=False,
+    #             **kwargs):
+    #     if not test_mode:
+    #         return self.forward_train(merged, trimap, meta, alpha, **kwargs)
+    #     else:
+    #         return self.forward_test(ori_merged, trimap, merged, trimap_transformed, meta, **kwargs)
 
     # TODO: 添加训练代码
     def forward_train(self, parameter_list):
         pass
 
     # TODO： 添加参数注释
-    def forward_test(self, ori_merged, trimap, merged, trimap_transformed, meta, save_image=False, save_path=None, iteration=None):
+    def forward_test(self, merged, trimap, meta, ori_merged, trimap_transformed, save_image=False, save_path=None, iteration=None):
 
         # resnet_input = torch.cat((image_n, trimap_transformed, two_chan_trimap), 1)
         # print(resnet_input.shape)
