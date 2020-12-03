@@ -174,7 +174,7 @@ log_config = dict(
 total_iters = 1000000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/fba'
+work_dir = './work_dirs/fba/train'
 load_from = './work_dirs/fba/FBA_rename_pat.pth'
 resume_from = None
 workflow = [('train', 1)]
