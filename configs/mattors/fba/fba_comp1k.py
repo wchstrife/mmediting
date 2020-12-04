@@ -32,7 +32,7 @@ img_norm_cfg = dict(
     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], to_rgb=True)
 
 img_norm_cfg_test =  dict(
-    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], format='chw', to_rgb=True)
+    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], format='chw')
 
 train_pipeline = [
     dict(type='LoadImageFromFile', key='alpha', flag='grayscale'),
