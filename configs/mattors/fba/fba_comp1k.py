@@ -160,9 +160,10 @@ data = dict(
         pipeline=test_pipeline))
 
 # optimizer
-optimizers = dict(type='Adam', lr=0.00001)
+optimizers = dict(type='Adam', lr=0.000001)
 # learning policy
-lr_config = dict(policy='Fixed')
+#lr_config = dict(policy='Fixed')
+lr_config = dict(policy='Step', step=[52000, 67600], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
 checkpoint_config = dict(interval=40000, by_epoch=False)
