@@ -43,12 +43,10 @@ train_pipeline = [
     dict(                       # 到时候换成更换后的FG
         type='CompositeFg',
         fg_dirs=[
-            data_root + 'Combined_Dataset/Training_set/Adobe-licensed images/fg',
-            data_root + 'Combined_Dataset/Training_set/Other/fg'
+            '/mnt/lustre/wangchenhao/code/gitlab/mmediting/data/adobe_train_fg_restimate'
         ],
         alpha_dirs=[
-            data_root + 'Combined_Dataset/Training_set/Adobe-licensed images/alpha',
-            data_root + 'Combined_Dataset/Training_set/Other/alpha'
+            '/mnt/lustre/wangchenhao/code/gitlab/mmediting/data/adobe_train_alpha'
         ]),    
 
     dict(type='Flip', keys=['alpha', 'fg', 'bg']),
@@ -194,6 +192,6 @@ total_iters = 1000000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
-load_from = './work_dirs/fba/FBA_rename_pat.pth'
+load_from = '' #'./work_dirs/fba/FBA_rename_pat.pth'
 resume_from = None
 workflow = [('train', 1)]
