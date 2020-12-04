@@ -167,7 +167,7 @@ data = dict(
 optimizers = dict(
     constructor='DefaultOptimizerConstructor',
     type='Adam',
-    lr='1e-5',
+    lr=1e-5,
     #momentum=0.9,
     weight_decay=0.0001,
     optimizer_cfg=dict(type='Adam', momentum=0.9),
