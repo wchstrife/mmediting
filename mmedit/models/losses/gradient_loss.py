@@ -48,10 +48,14 @@ class LaplacianLoss(nn.Module):
         self.reduction=reduction
         
     def forward(self, input, target, weight=None):
-        pyr_input  = self.laplacian_pyramid( input, self._gauss_kernel, self.max_levels)
+        pyr_input  = self.laplacian_pyramid(input, self._gauss_kernel, self.max_levels)
         pyr_target = self.laplacian_pyramid(target, self._gauss_kernel, self.max_levels)
-        return self.loss_weight * (sum(l1_loss(a, b, weight, reduction=self.reduction, sample_wise=True) for a, b in zip(pyr_input, pyr_target)))
-
+        
+        if weight is not None:  # 传入weight的话需要对weight进行下采样
+            pyr_weight = self.weight_pyramid(weight, max_levels=self.max_levels)
+            return self.loss_weight * (sum(l1_loss(a, b, c, reduction=self.reduction, sample_wise=True) for a, b, c in zip(pyr_input, pyr_target, pyr_weight)))
+        else:
+            return self.loss_weight * (sum(l1_loss(a, b, reduction=self.reduction, sample_wise=True) for a, b in zip(pyr_input, pyr_target)))
     def build_gauss_kernel(self, size=5, sigma=1.0, n_channels=1, cuda=False):
         if size % 2 != 1:
             raise ValueError("kernel size must be uneven")
@@ -89,6 +93,20 @@ class LaplacianLoss(nn.Module):
         pyr.append(current)
         return pyr
 
+    def weight_pyramid(self, img, max_levels=5):
+        current = img
+        pyr = []
+
+        for level in range(max_levels):
+            down = self.downsample(current)
+            pyr.append(current)
+            current = down
+
+        pyr.append(current)
+        return pyr
+
+    def downsample(self, x):
+        return x[:, :, ::2, ::2]
 
 @LOSSES.register_module()
 class GradientLoss(nn.Module):

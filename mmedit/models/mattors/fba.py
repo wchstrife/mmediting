@@ -94,7 +94,7 @@ class FBA(BaseMattor):
         if self.loss_alpha_grad is not None:
             losses['loss_alpha_grad'] = self.loss_alpha_grad(pred_alpha, alpha, weight)
         if self.loss_alpha_lap is not None:
-            losses['loss_alpha_lap'] = self.loss_alpha_lap(pred_alpha, alpha) # 拉普拉斯暂时不考虑weight
+            losses['loss_alpha_lap'] = self.loss_alpha_lap(pred_alpha, alpha, weight) # 这里需要在unknown区域
         if self.loss_f_l1 is not None:
             losses['loss_f_l1'] = self.loss_f_l1(pred_fg, fg)       # 整张图计算
         if self.loss_b_l1 is not None:
