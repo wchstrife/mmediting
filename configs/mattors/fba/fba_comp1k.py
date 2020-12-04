@@ -166,7 +166,11 @@ data = dict(
 
 optimizers = dict(
     constructor='DefaultOptimizerConstructor',
-    optimizer_cfg=dict(type='Adam', lr=1e-5, momentum=0.9, weight_decay=0.0001),
+    type='Adam',
+    lr='1e-5',
+    momentum=0.9,
+    weight_decay=0.0001,
+    optimizer_cfg=dict(type='Adam', momentum=0.9),
     paramwise_cfg=dict(custom_keys={'conv':dict(lr_mult=1, decay_mult=50), 'bn':dict(lr_mult=1, decay_mult=0.1)})
     )
 
