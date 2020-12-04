@@ -102,7 +102,7 @@ test_pipeline = [
     dict(
         type='LoadImageFromFile', 
         key='merged', 
-        channel_order='rgb',
+        #channel_order='rgb',
         save_original_img=True),    # ori_merged
 
     dict(type='CopyImage', key='trimap'),    # Copy a image for evaluate name: copy_trimap
@@ -120,10 +120,10 @@ test_pipeline = [
 
     dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
 
-    #dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
+    dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
 
-    dict(type='ImageToTensor', keys=['merged']),
-    dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
+    #dict(type='ImageToTensor', keys=['merged']),
+    #dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
 
     
     dict(
@@ -133,7 +133,8 @@ test_pipeline = [
             'merged_path', 'merged_ori_shape', 'ori_alpha', 'ori_trimap', 'copy_trimap'
         ]),
     
-    dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed']),
+    # dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed']),
+    dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed', 'merged']),
 
 ]
 
