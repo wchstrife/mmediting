@@ -160,10 +160,21 @@ data = dict(
         pipeline=test_pipeline))
 
 # optimizer
-optimizers = dict(type='Adam', lr=0.000001)
+optimizers_cfg = dict(type='Adam', lr=1e-5, momentun=0.9, weight_decay=0.0001)
+paramwise_cfg_1 = dict(custom_keys={'conv': dict(lr_mult=1, decay_mult=50), 'bn': dict(lr_mult=1, decay_mult=0.1})
+paramwise_cfg_2 = dict(custom_keys={)})
+
+optimizers = dict(
+    constructor='DefaultOptimizerConstructor',
+    type='Adam',
+    lr=1e-5,
+    momentun=0.9,
+    weight_decay=0.0001,
+    paramwise_cfg=dict(custom_keys={'conv': dict(lr_mult=1, decay_mult=50), 'bn': dict(lr_mult=1, decay_mult=0.1)}))
+
 # learning policy
 #lr_config = dict(policy='Fixed')
-lr_config = dict(policy='Step', step=[52000, 67600], gamma=0.1, by_epoch=False)
+lr_config = dict(policy='Step', step=[40], gamma=0.1, by_epoch=True)
 
 # checkpoint saving
 checkpoint_config = dict(interval=40000, by_epoch=False)
