@@ -160,15 +160,15 @@ data = dict(
         pipeline=test_pipeline))
 
 # optimizer
-optimizers_cfg = dict(type='Adam', lr=1e-5, momentun=0.9, weight_decay=0.0001)
-paramwise_cfg_1 = dict(custom_keys={'conv': dict(lr_mult=1, decay_mult=50), 'bn': dict(lr_mult=1, decay_mult=0.1})
-paramwise_cfg_2 = dict(custom_keys={)})
+# optimizers_cfg = dict(type='Adam', lr=1e-5, momentun=0.9, weight_decay=0.0001)
+# paramwise_cfg_1 = dict(custom_keys={'conv': dict(lr_mult=1, decay_mult=50), 'bn': dict(lr_mult=1, decay_mult=0.1})
+# paramwise_cfg_2 = dict(custom_keys={)})
 
 optimizers = dict(
     constructor='DefaultOptimizerConstructor',
     type='Adam',
     lr=1e-5,
-    momentun=0.9,
+    momentum=0.9,
     weight_decay=0.0001,
     paramwise_cfg=dict(custom_keys={'conv': dict(lr_mult=1, decay_mult=50), 'bn': dict(lr_mult=1, decay_mult=0.1)}))
 

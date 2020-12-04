@@ -56,6 +56,7 @@ class LaplacianLoss(nn.Module):
             return self.loss_weight * (sum(l1_loss(a, b, c, reduction=self.reduction, sample_wise=True) for a, b, c in zip(pyr_input, pyr_target, pyr_weight)))
         else:
             return self.loss_weight * (sum(l1_loss(a, b, reduction=self.reduction, sample_wise=True) for a, b in zip(pyr_input, pyr_target)))
+    
     def build_gauss_kernel(self, size=5, sigma=1.0, n_channels=1, cuda=False):
         if size % 2 != 1:
             raise ValueError("kernel size must be uneven")
