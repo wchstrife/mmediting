@@ -78,7 +78,7 @@ class LaplacianLoss(nn.Module):
         """ convolve img with a gaussian kernel that has been built with build_gauss_kernel """
         n_channels, _, kw, kh = kernel.shape
         img = F.pad(img, (kw//2, kh//2, kw//2, kh//2), mode='replicate')
-        return F.conv2d(img, kernel, groups=n_channels)
+        return F.conv2d(img, kernel, groups=img.shape[1])
 
 
     def laplacian_pyramid(self, img, kernel, max_levels=5):
