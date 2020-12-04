@@ -162,9 +162,22 @@ data = dict(
         pipeline=test_pipeline))
 
 # optimizer
-optimizers = dict(type='Adam', lr=0.00001)
+# optimizers = dict(type='Adam', lr=0.00001)
+
+optimizers = dict(
+    constructor='DefaultOptimizerConstructor',
+    type='Adam',
+    lr='1e-5',
+    #momentum=0.9,
+    weight_decay=0.0001,
+    optimizer_cfg=dict(type='Adam', momentum=0.9),
+    paramwise_cfg=dict(custom_keys={'conv':dict(lr_mult=1, decay_mult=50), 'bn':dict(lr_mult=1, decay_mult=0.1)})
+    )
+
 # learning policy
 lr_config = dict(policy='Fixed')
+
+
 
 # checkpoint saving
 checkpoint_config = dict(interval=40000, by_epoch=False)
