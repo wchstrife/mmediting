@@ -7,6 +7,7 @@ model = dict(
         encoder=dict(type='FBAEncoder', in_channels=11, block='resnet50_GN_WS'),
         decoder=dict(type='FBADecoder')),
 
+    #pretrained='/home/sensetime/work/mmediting/work_dirs/fba/model/resnet_50_GN_WS_rename.pth',
     pretrained=None,
 
     loss_alpha_l1=dict(type='L1Loss', loss_weight=1),

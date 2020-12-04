@@ -127,16 +127,12 @@ class GroupNoraliseImage(object):
 
         for key in self.keys:
             img = results[key].copy() #.astype(np.float32)
-            # img = img[None, :, :, :].float()
-            # img.cpu().numpy().tofile('/home2/wangchenhao/mmediting/dat/before_norm.dat')
             if (format == 'hwc'):
                 for i in range(3):
                     img[..., i] = (img[..., i] - self.mean[i]) / self.std[i]
             else:
                 for i in range(3):
                     img[..., i, :, :] = (img[..., i, :, :] - self.mean[i]) / self.std[i]
-            # img.cpu().numpy().tofile('/home2/wangchenhao/mmediting/dat/after_norm.dat')
-            # img = img.squeeze()
             results[key] = img
 
         results['img_norm_cfg'] = dict(
