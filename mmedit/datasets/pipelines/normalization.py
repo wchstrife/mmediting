@@ -126,7 +126,7 @@ class GroupNoraliseImage(object):
         """
 
         for key in self.keys:
-            img = results[key].copy().astype(np.float32)
+            img = results[key].clone() #copy().astype(np.float32)
             if (format == 'hwc'):
                 for i in range(3):
                     img[..., i] = (img[..., i] - self.mean[i]) / self.std[i]

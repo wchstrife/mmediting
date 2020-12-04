@@ -96,17 +96,17 @@ class FBA(BaseMattor):
         if self.loss_alpha_lap is not None:
             losses['loss_alpha_lap'] = self.loss_alpha_lap(pred_alpha, alpha) # 拉普拉斯暂时不考虑weight
         if self.loss_f_l1 is not None:
-            losses['loss_f_l1'] = self.loss_f_l1(pred_fg, fg)
+            losses['loss_f_l1'] = self.loss_f_l1(pred_fg, fg)       # 整张图计算
         if self.loss_b_l1 is not None:
-            losses['loss_b_l1'] = self.loss_b_l1(pred_bg, bg)
+            losses['loss_b_l1'] = self.loss_b_l1(pred_bg, bg)       # 整张图计算
         if self.loss_fb_excl is not None:
-            losses['loss_fb_excl'] = self.loss_fb_excl(pred_fg, pred_bg, weight)
+            losses['loss_fb_excl'] = self.loss_fb_excl(pred_fg, pred_bg, weight)    
         if self.loss_fb_comp is not None:
-            losses['loss_fb_comp'] = self.loss_fb_comp(alpha, pred_fg, pred_bg,ori_merged, weight)
+            losses['loss_fb_comp'] = self.loss_fb_comp(alpha, pred_fg, pred_bg, ori_merged, weight)
         if self.loss_f_lap is not None:
-            losses['loss_f_lap'] = self.loss_f_lap(pred_fg, fg)
+            losses['loss_f_lap'] = self.loss_f_lap(pred_fg, fg)     # 整张图计算
         if self.loss_b_lap is not None:
-            losses['loss_b_lap'] = self.loss_b_lap(pred_bg, bg)
+            losses['loss_b_lap'] = self.loss_b_lap(pred_bg, bg)     # 整张图计算
         
 
         return {'losses': losses, 'num_samples': merged.size(0)}            

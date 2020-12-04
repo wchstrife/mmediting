@@ -7,7 +7,7 @@ model = dict(
         encoder=dict(type='FBAEncoder', in_channels=11, block='resnet50_GN_WS'),
         decoder=dict(type='FBADecoder')),
 
-    pretrained=None,
+    pretrained='work_dirs/fba/resnet_50_GN_WS_rename.pth',
 
     loss_alpha_l1=dict(type='L1Loss', loss_weight=1),
     loss_alpha_comp=dict(type='L1CompositionLoss', loss_weight=1),
@@ -32,7 +32,7 @@ img_norm_cfg = dict(
     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], to_rgb=True)
 
 img_norm_cfg_test =  dict(
-    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], format='hwc')
+    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], format='chw')
 
 train_pipeline = [
     dict(type='LoadImageFromFile', key='alpha', flag='grayscale'),
@@ -122,9 +122,9 @@ test_pipeline = [
 
     #dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
 
-    dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
     dict(type='ImageToTensor', keys=['merged']),
-    
+    dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
+
     
     dict(
         type='Collect',
