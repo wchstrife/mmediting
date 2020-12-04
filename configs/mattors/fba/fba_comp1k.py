@@ -32,7 +32,7 @@ img_norm_cfg = dict(
     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], to_rgb=True)
 
 img_norm_cfg_test =  dict(
-    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], format='chw')
+    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], format='hwc')
 
 train_pipeline = [
     dict(type='LoadImageFromFile', key='alpha', flag='grayscale'),
@@ -121,9 +121,10 @@ test_pipeline = [
     dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
 
     #dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
-    
+
     dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
     dict(type='ImageToTensor', keys=['merged']),
+    
     
     dict(
         type='Collect',

@@ -126,7 +126,7 @@ class GroupNoraliseImage(object):
         """
 
         for key in self.keys:
-            img = results[key].copy() #.astype(np.float32)
+            img = results[key].copy().astype(np.float32)
             if (format == 'hwc'):
                 for i in range(3):
                     img[..., i] = (img[..., i] - self.mean[i]) / self.std[i]
@@ -135,7 +135,7 @@ class GroupNoraliseImage(object):
                     img[..., i, :, :] = (img[..., i, :, :] - self.mean[i]) / self.std[i]
             results[key] = img
 
-        results['img_norm_cfg'] = dict(
+        results['img_norm_cfg_test'] = dict(
             mean=self.mean, std=self.std)
         return results
 
