@@ -98,15 +98,15 @@ class FBA(BaseMattor):
         if self.loss_f_l1 is not None:
             losses['loss_f_l1'] = self.loss_f_l1(pred_fg, fg)
         if self.loss_b_l1 is not None:
-            losses['loss_b_l1'] = self.loss_b_l1(pred_bg, bg, weight)
+            losses['loss_b_l1'] = self.loss_b_l1(pred_bg, bg)
         if self.loss_fb_excl is not None:
             losses['loss_fb_excl'] = self.loss_fb_excl(pred_fg, pred_bg, weight)
         if self.loss_fb_comp is not None:
-            losses['loss_fb_comp'] = self.loss_fb_comp(alpha, pred_fg, pred_bg, weight)
+            losses['loss_fb_comp'] = self.loss_fb_comp(alpha, pred_fg, pred_bg,ori_merged, weight)
         if self.loss_f_lap is not None:
-            losses['loss_f_lap'] = self.loss_f_lap(pred_fg, fg, weight)
+            losses['loss_f_lap'] = self.loss_f_lap(pred_fg, fg)
         if self.loss_b_lap is not None:
-            losses['loss_b_lap'] = self.loss_b_lap(pred_bg, bg, weight)
+            losses['loss_b_lap'] = self.loss_b_lap(pred_bg, bg)
         
 
         return {'losses': losses, 'num_samples': merged.size(0)}            

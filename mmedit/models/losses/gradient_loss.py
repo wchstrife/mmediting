@@ -160,6 +160,9 @@ class GradientExclusionLoss(nn.Module):
         ky = torch.Tensor([[1, 2, 1], [0, 0, 0],
                            [-1, -2, -1]]).view(1, 1, 3, 3).to(bg)
 
+        kx = kx.repeat(1,3,1,1)
+        ky = ky.repeat(1,3,1,1)
+
         fg_grad_x = F.conv2d(fg, kx, padding=1)
         fg_grad_y = F.conv2d(fg, ky, padding=1)
         bg_grad_x = F.conv2d(bg, kx, padding=1)
