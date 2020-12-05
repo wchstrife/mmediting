@@ -115,7 +115,7 @@ class FBA(BaseMattor):
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
 
-        result = self.restore_shape(result, meta) 
+        result = self.restore_shape(result, meta) # TODO 验证restore前后的尺度，确定要不要重新设计下面的todo
 
         pred_alpha = result[:, :, 0]
         fg = result[:, :, 1:4]
@@ -126,7 +126,7 @@ class FBA(BaseMattor):
         pred_alpha[ori_trimap[:, :, 1] == 1] = 1
 
         # fg[alpha == 1] = image_np[alpha == 1] # TODO: 需要返回fg和bg时，需要用到merge_np，也就是ori_merge，但是在这里的实现已经经过了插值，改变的话需要重写norm层保留下来原来的ori_merged
-        # bg[alpha == 0] = image_np[alpha == 0]
+        # bg[alpha == 0] = image_np[alpha == 0] 
 
         # result = result.cpu().numpy().squeeze()
         # trimap = trimap.cpu().numpy().squeeze()
