@@ -188,7 +188,7 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 1000000
+total_iters = 2000000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
