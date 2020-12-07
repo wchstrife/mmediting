@@ -39,6 +39,7 @@ class MergeFgAndBg(object):
         bg = results['bg']
         merged = fg * alpha + (1. - alpha) * bg
         results['merged'] = merged
+        results['ori_merged'] = merged
         return results
 
 
@@ -374,7 +375,7 @@ class CompositeFg(object):
         alpha = results['alpha'].astype(np.float32) / 255.
         h, w = results['fg'].shape[:2]
 
-        # randomly select fg
+        # randomly select fgF
         if np.random.rand() < 0.5:
             idx = np.random.randint(len(self.fg_list))
             fg2 = mmcv.imread(self.fg_list[idx])
@@ -688,3 +689,4 @@ class GenerateSoftSeg(object):
                      f'dilate_iter_range={self.dilate_iter_range}, '
                      f'blur_ksizes={self.blur_ksizes})')
         return repr_str
+

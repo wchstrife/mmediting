@@ -9,6 +9,7 @@ from mmedit.models.backbones.encoder_decoders.encoders import fba_resnet_GN_WS a
 from mmedit.models.registry import COMPONENTS
 from mmedit.utils.logger import get_root_logger
 from mmcv.runner import load_checkpoint
+from mmcv.cnn import ConvModule, constant_init, xavier_init
 
 def build_encoder(self, arch='resnet50_GN_WS'):
     if arch == 'resnet50_GN_WS':
@@ -48,6 +49,7 @@ class FBAEncoder(nn.Module):
     def __init__(self, in_channels, block):
         super(FBAEncoder, self).__init__()
         assert in_channels == 11, (f'in_channels must be 11, but got {in_channels}')
+        self.in_channels = in_channels
 
         if block == 'resnet50_GN_WS':
             orig_resnet = resnet_GN_WS.__dict__['l_resnet50']()
@@ -58,36 +60,80 @@ class FBAEncoder(nn.Module):
         else:
             raise Exception('Architecture undefined!')
 
-        if(in_channels > 3):
-            print(f'modifying input layer to accept {in_channels} channels')
-            net_encoder_sd = net_encoder.state_dict()
-            conv1_weights = net_encoder_sd['conv1.weight']      
+        # if(in_channels > 3):
+        #     print(f'modifying input layer to accept {in_channels} channels')
+        #     net_encoder_sd = net_encoder.state_dict()
+        #     conv1_weights = net_encoder_sd['conv1.weight']      
 
-            c_out, c_in, h, w = conv1_weights.size()
-            conv1_mod = torch.zeros(c_out, in_channels, h, w)
-            conv1_mod[:, :3, :, :] = conv1_weights              
+        #     c_out, c_in, h, w = conv1_weights.size()
+        #     conv1_mod = torch.zeros(c_out, in_channels, h, w)
+        #     conv1_mod[:, :3, :, :] = conv1_weights              
 
-            conv1 = net_encoder.conv1
-            conv1.in_channels = in_channels
-            conv1.weight = torch.nn.Parameter(conv1_mod)
+        #     conv1 = net_encoder.conv1
+        #     conv1.in_channels = in_channels
+        #     conv1.weight = torch.nn.Parameter(conv1_mod)
 
-            net_encoder.conv1 = conv1
+        #     net_encoder.conv1 = conv1
 
-            net_encoder_sd['conv1.weight'] = conv1_mod
+        #     net_encoder_sd['conv1.weight'] = conv1_mod
 
-            net_encoder.load_state_dict(net_encoder_sd)
+        #     net_encoder.load_state_dict(net_encoder_sd)
 
-            self.encoder = net_encoder
-   
+        #     self.encoder = net_encoder
+        self.encoder = net_encoder
     
     def init_weights(self, pretrained=None):
         if isinstance(pretrained, str):
-            self.encoder.conv1.weight.data[:, 3:, :, :] = 0
+            #self.encoder.conv1.weight.data[:, 3:, :, :] = 0
         
             logger = get_root_logger()
             load_checkpoint(self, pretrained, strict=False, logger=logger)
+
+            if (self.in_channels) > 3:
+                print(f'modifying input layer to accept {self.in_channels} channels')
+                net_encoder_sd = self.encoder.state_dict()
+                conv1_weights = net_encoder_sd['conv1.weight']      
+
+                c_out, c_in, h, w = conv1_weights.size()
+                conv1_mod = torch.zeros(c_out, self.in_channels, h, w)
+                conv1_mod[:, :3, :, :] = conv1_weights              
+
+                conv1 = self.encoder.conv1
+                conv1.in_channels = self.in_channels
+                conv1.weight = torch.nn.Parameter(conv1_mod)
+
+                self.encoder.conv1 = conv1
+
+                net_encoder_sd['conv1.weight'] = conv1_mod
+
+                self.encoder.load_state_dict(net_encoder_sd)
+
         elif pretrained is None:
-            pass
+            
+            if (self.in_channels) > 3:
+                print(f'modifying input layer to accept {self.in_channels} channels')
+                net_encoder_sd = self.encoder.state_dict()
+                conv1_weights = net_encoder_sd['conv1.weight']      
+
+                c_out, c_in, h, w = conv1_weights.size()
+                conv1_mod = torch.zeros(c_out, self.in_channels, h, w)
+                conv1_mod[:, :3, :, :] = conv1_weights              
+
+                conv1 = self.encoder.conv1
+                conv1.in_channels = self.in_channels
+                conv1.weight = torch.nn.Parameter(conv1_mod)
+
+                self.encoder.conv1 = conv1
+
+                net_encoder_sd['conv1.weight'] = conv1_mod
+
+                self.encoder.load_state_dict(net_encoder_sd)
+
+            for m in self.modules():
+                if isinstance(m, nn.Conv2d):
+                    xavier_init(m)
+                elif isinstance(m, nn.BatchNorm2d):
+                    constant_init(m, 1)
         else:
             raise TypeError(f'"pretrained" must be a str or None.' f'But received {type(pretrained)}')
 

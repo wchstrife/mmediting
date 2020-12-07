@@ -6,53 +6,116 @@ import numpy as np
 from ..builder import build_loss
 from ..registry import MODELS
 from .base_mattor import BaseMattor
+from .utils import get_unknown_tensor
 
 
 @MODELS.register_module()
 class FBA(BaseMattor):
 
-
-    def __init__(self, backbone, train_cfg=None, test_cfg=None, pretrained=None, loss_alpha=None, loss_comp=None):
+    def __init__(self,
+                backbone, 
+                train_cfg=None, 
+                test_cfg=None, 
+                pretrained=None, 
+                loss_alpha_l1=None,
+                loss_alpha_comp=None,
+                loss_alpha_grad=None,
+                loss_alpha_lap=None,
+                loss_f_l1=None,
+                loss_b_l1=None,
+                loss_fb_excl=None,
+                loss_fb_comp=None,
+                loss_f_lap=None,
+                loss_b_lap=None
+                ):
         super(FBA, self).__init__(backbone, None, train_cfg, test_cfg, pretrained)
+        
+        if all(v is None for v in (loss_alpha_l1,
+                                    loss_alpha_comp,
+                                    loss_alpha_grad,
+                                    loss_alpha_lap,
+                                    loss_f_l1,
+                                    loss_b_l1,
+                                    loss_fb_excl,
+                                    loss_fb_comp,
+                                    loss_f_lap,
+                                    loss_b_lap
+                                    )):
+            raise ValueError('Please specify one loss for FBA.')
 
-        # TODO: 添加其他Loss
-        self.loss_alpha = (build_loss(loss_alpha) if loss_alpha is not None else None)
-        self.loss_comp = (build_loss(loss_comp) if loss_comp is not None else None)
+        self.loss_alpha_l1 = (build_loss(loss_alpha_l1) if loss_alpha_l1 is not None else None)
+        self.loss_alpha_comp = (build_loss(loss_alpha_comp) if loss_alpha_comp is not None else None)   
+        self.loss_alpha_grad = (build_loss(loss_alpha_grad) if loss_alpha_grad is not None else None)
+        self.loss_alpha_lap = (build_loss(loss_alpha_lap) if loss_alpha_lap is not None else None)     
+        self.loss_f_l1 = (build_loss(loss_f_l1) if loss_f_l1 is not None else None)
+        self.loss_b_l1 = (build_loss(loss_b_l1) if loss_b_l1 is not None else None)   
+        self.loss_fb_excl = (build_loss(loss_fb_excl) if loss_fb_excl is not None else None)
+        self.loss_fb_comp = (build_loss(loss_fb_comp) if loss_fb_comp is not None else None)
+        self.loss_f_lap = (build_loss(loss_f_lap) if loss_f_lap is not None else None)
+        self.loss_b_lap = (build_loss(loss_b_lap) if loss_b_lap is not None else None) 
 
+         # support fp16
+        self.fp16_enabled = False                 
+        
+        
     def forward_dummy(self, inputs):
         return self.backbone(inputs)
 
-    def forward(self,
-                ori_merged,
-                trimap,
-                merged,
-                trimap_transformed,
-                meta,
-                alpha=None,
-                test_mode=False,
-                **kwargs):
-        if not test_mode:
-            return self.forward_train(merged, trimap, meta, alpha, **kwargs)
-        else:
-            return self.forward_test(ori_merged, trimap, merged, trimap_transformed, meta, **kwargs)
+    # def forward(self,
+    #             ori_merged,
+    #             trimap,
+    #             merged,
+    #             trimap_transformed,
+    #             meta,
+    #             alpha=None,
+    #             test_mode=False,
+    #             **kwargs):
+    #     if not test_mode:
+    #         return self.forward_train(merged, trimap, meta, alpha, **kwargs)
+    #     else:
+    #         return self.forward_test(ori_merged, trimap, merged, trimap_transformed, meta, **kwargs)
 
     # TODO: 添加训练代码
-    def forward_train(self, parameter_list):
-        pass
+    def forward_train(self, merged, trimap, meta, alpha, ori_merged, fg, bg, trimap_transformed, trimap_1channel):
 
-    # TODO： 添加参数注释
-    def forward_test(self, ori_merged, trimap, merged, trimap_transformed, meta, save_image=False, save_path=None, iteration=None):
+        result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
+        pred_alpha = result[..., 0:1, :, :]
+        pred_fg = result[..., 1:4, :, :]
+        pred_bg = result[..., 4:7, :, :]
 
-        # resnet_input = torch.cat((image_n, trimap_transformed, two_chan_trimap), 1)
-        # print(resnet_input.shape)
+        weight = get_unknown_tensor(trimap_1channel, meta)
+
+        losses = dict()
+
+        if self.loss_alpha_l1 is not None:
+            losses['loss_alpha_l1'] = self.loss_alpha_l1(pred_alpha, alpha, weight)
+        if self.loss_alpha_comp is not None:
+            losses['loss_alpha_comp'] = self.loss_alpha_comp(pred_alpha, fg, bg, ori_merged, weight)
+        if self.loss_alpha_grad is not None:
+            losses['loss_alpha_grad'] = self.loss_alpha_grad(pred_alpha, alpha, weight)
+        if self.loss_alpha_lap is not None:
+            losses['loss_alpha_lap'] = self.loss_alpha_lap(pred_alpha, alpha, weight) # 这里需要在unknown区域
+        if self.loss_f_l1 is not None:
+            losses['loss_f_l1'] = self.loss_f_l1(pred_fg, fg)       # 整张图计算
+        if self.loss_b_l1 is not None:
+            losses['loss_b_l1'] = self.loss_b_l1(pred_bg, bg)       # 整张图计算
+        if self.loss_fb_excl is not None:
+            losses['loss_fb_excl'] = self.loss_fb_excl(pred_fg, pred_bg, weight)    
+        if self.loss_fb_comp is not None:
+            losses['loss_fb_comp'] = self.loss_fb_comp(alpha, pred_fg, pred_bg, ori_merged, weight)
+        if self.loss_f_lap is not None:
+            losses['loss_f_lap'] = self.loss_f_lap(pred_fg, fg)     # 整张图计算
+        if self.loss_b_lap is not None:
+            losses['loss_b_lap'] = self.loss_b_lap(pred_bg, bg)     # 整张图计算
+        
+
+        return {'losses': losses, 'num_samples': merged.size(0)}            
+
+    def forward_test(self, merged, trimap, meta, ori_merged, trimap_transformed, save_image=False, save_path=None, iteration=None):
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
 
-        # result.cpu().numpy().tofile('/home2/wangchenhao/mmediting/dat/result_before_reshape.dat')
-
-        result = self.restore_shape(result, meta) # TODO: 将这里封装进restore_shape
-
-        # result.tofile('/home2/wangchenhao/mmediting/dat/result_after_reshape.dat')
+        result = self.restore_shape(result, meta) # TODO 验证restore前后的尺度，确定要不要重新设计下面的todo
 
         pred_alpha = result[:, :, 0]
         fg = result[:, :, 1:4]
@@ -62,9 +125,8 @@ class FBA(BaseMattor):
         pred_alpha[ori_trimap[:, :, 0] == 1] = 0
         pred_alpha[ori_trimap[:, :, 1] == 1] = 1
 
-        # pred_alpha.tofile('/home2/wangchenhao/mmediting/dat/pred.dat')
         # fg[alpha == 1] = image_np[alpha == 1] # TODO: 需要返回fg和bg时，需要用到merge_np，也就是ori_merge，但是在这里的实现已经经过了插值，改变的话需要重写norm层保留下来原来的ori_merged
-        # bg[alpha == 0] = image_np[alpha == 0]
+        # bg[alpha == 0] = image_np[alpha == 0] 
 
         # result = result.cpu().numpy().squeeze()
         # trimap = trimap.cpu().numpy().squeeze()

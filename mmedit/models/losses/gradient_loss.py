@@ -48,10 +48,15 @@ class LaplacianLoss(nn.Module):
         self.reduction=reduction
         
     def forward(self, input, target, weight=None):
-        pyr_input  = self.laplacian_pyramid( input, self._gauss_kernel, self.max_levels)
+        pyr_input  = self.laplacian_pyramid(input, self._gauss_kernel, self.max_levels)
         pyr_target = self.laplacian_pyramid(target, self._gauss_kernel, self.max_levels)
-        return self.loss_weight * (sum(l1_loss(a, b, weight, reduction=self.reduction, sample_wise=True) for a, b in zip(pyr_input, pyr_target)))
-
+        
+        if weight is not None:  # 传入weight的话需要对weight进行下采样
+            pyr_weight = self.weight_pyramid(weight, max_levels=self.max_levels)
+            return self.loss_weight * (sum(l1_loss(a, b, c, reduction=self.reduction, sample_wise=True) for a, b, c in zip(pyr_input, pyr_target, pyr_weight)))
+        else:
+            return self.loss_weight * (sum(l1_loss(a, b, reduction=self.reduction, sample_wise=True) for a, b in zip(pyr_input, pyr_target)))
+    
     def build_gauss_kernel(self, size=5, sigma=1.0, n_channels=1, cuda=False):
         if size % 2 != 1:
             raise ValueError("kernel size must be uneven")
@@ -73,7 +78,7 @@ class LaplacianLoss(nn.Module):
         """ convolve img with a gaussian kernel that has been built with build_gauss_kernel """
         n_channels, _, kw, kh = kernel.shape
         img = F.pad(img, (kw//2, kh//2, kw//2, kh//2), mode='replicate')
-        return F.conv2d(img, kernel, groups=n_channels)
+        return F.conv2d(img, kernel, groups=img.shape[1])
 
 
     def laplacian_pyramid(self, img, kernel, max_levels=5):
@@ -89,6 +94,20 @@ class LaplacianLoss(nn.Module):
         pyr.append(current)
         return pyr
 
+    def weight_pyramid(self, img, max_levels=5):
+        current = img
+        pyr = []
+
+        for level in range(max_levels):
+            down = self.downsample(current)
+            pyr.append(current)
+            current = down
+
+        pyr.append(current)
+        return pyr
+
+    def downsample(self, x):
+        return x[:, :, ::2, ::2]
 
 @LOSSES.register_module()
 class GradientLoss(nn.Module):
@@ -131,4 +150,49 @@ class GradientLoss(nn.Module):
                 pred_grad_x, target_grad_x, weight, reduction=self.reduction) +
             l1_loss(
                 pred_grad_y, target_grad_y, weight, reduction=self.reduction))
+        return loss * self.loss_weight
+
+@LOSSES.register_module()
+class GradientExclusionLoss(nn.Module):
+    """Gradient Exclusion Loss.
+
+    Args:
+        loss_weight (float): Loss weight for L1 loss. Default: 1.0.
+    """
+
+    def __init__(self, loss_weight=1.0, reduction='mean'):
+        super(GradientExclusionLoss, self).__init__()
+        self.loss_weight = loss_weight
+        self.reduction = reduction
+        if self.reduction not in ['none', 'mean', 'sum']:
+            raise ValueError(f'Unsupported reduction mode: {self.reduction}. '
+                             f'Supported ones are: {_reduction_modes}')
+
+    def forward(self, fg, bg, weight):
+        """
+        Args:
+            fg (Tensor): of shape (N, C, H, W). FG tensor.
+            bg (Tensor): of shape (N, C, H, W). BG tensor.
+        """
+        kx = torch.Tensor([[1, 0, -1], [2, 0, -2],
+                           [1, 0, -1]]).view(1, 1, 3, 3).to(bg)
+        ky = torch.Tensor([[1, 2, 1], [0, 0, 0],
+                           [-1, -2, -1]]).view(1, 1, 3, 3).to(bg)
+
+        kx = kx.repeat(1,3,1,1)
+        ky = ky.repeat(1,3,1,1)
+
+        fg_grad_x = F.conv2d(fg, kx, padding=1)
+        fg_grad_y = F.conv2d(fg, ky, padding=1)
+        bg_grad_x = F.conv2d(bg, kx, padding=1)
+        bg_grad_y = F.conv2d(bg, ky, padding=1)
+
+        fg_grad = torch.abs(fg_grad_x) + torch.abs(fg_grad_y)
+        bg_grad = torch.abs(bg_grad_x) + torch.abs(bg_grad_y)
+
+        grad = fg_grad.mul(bg_grad)
+        zero = torch.zeros_like(grad).to(grad)
+
+        loss = l1_loss(grad, zero, weight, reduction=self.reduction)
+
         return loss * self.loss_weight

@@ -276,8 +276,9 @@ class FormatTrimap2Channel(object):
         trimap_2C = np.zeros((h, w, 2))
         trimap_2C[trimap == 1, 1] = 1
         trimap_2C[trimap == 0, 0] = 1
+        results[f'{self.key}_1channel'] = results[self.key]
         results[self.key] = trimap_2C
-
+        
         return results
 
     def __repr__(self):

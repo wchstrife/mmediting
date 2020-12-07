@@ -7,7 +7,8 @@ model = dict(
         encoder=dict(type='FBAEncoder', in_channels=11, block='resnet50_GN_WS'),
         decoder=dict(type='FBADecoder')),
 
-    pretrained='work_dirs/fba/resnet_50_GN_WS_rename.pth',
+    pretrained='/home/sensetime/work/mmediting/work_dirs/fba/model/resnet_50_GN_WS_rename.pth',
+    #pretrained=None,
 
     loss_alpha_l1=dict(type='L1Loss', loss_weight=1),
     loss_alpha_comp=dict(type='L1CompositionLoss', loss_weight=1),
@@ -27,26 +28,31 @@ test_cfg = dict(metrics=['SAD', 'MSE', 'GRAD', 'CONN'])
 
 # dataset settings
 dataset_type = 'AdobeComp1kDataset'
-data_root = '/mnt/lustre/share/3darseg/segmentation/matting/'
+data_root = '/home/sensetime/work/mmediting/data/Adobe/'
 img_norm_cfg = dict(
     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], to_rgb=True)
 
 img_norm_cfg_test =  dict(
-    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], format='chw')
+    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], format='chw', to_rgb=True)
+
+bg_dir='/home/sensetime/work/mmediting/data/Adobe/bg'
 
 train_pipeline = [
     dict(type='LoadImageFromFile', key='alpha', flag='grayscale'),
     dict(type='LoadImageFromFile', key='fg'),
-    dict(type='LoadImageFromFile', key='bg'),
+    dict(type='RandomLoadResizeBg', bg_dir=bg_dir),
+    #dict(type='LoadImageFromFile', key='bg'),
     #dict(type='LoadImageFromFile', key='merged', save_original_img=True),
 
     dict(                       # 到时候换成更换后的FG
         type='CompositeFg',
         fg_dirs=[
-            '/mnt/lustre/wangchenhao/code/gitlab/mmediting/data/adobe_train_fg_restimate'
+            data_root + 'Combined_Dataset/Training_set/Adobe-licensed images/fg',
+            data_root + 'Combined_Dataset/Training_set/Other/fg'
         ],
         alpha_dirs=[
-            '/mnt/lustre/wangchenhao/code/gitlab/mmediting/data/adobe_train_alpha'
+            data_root + 'Combined_Dataset/Training_set/Adobe-licensed images/alpha',
+            data_root + 'Combined_Dataset/Training_set/Other/alpha'
         ]),    
 
     dict(type='Flip', keys=['alpha', 'fg', 'bg']),
@@ -118,11 +124,10 @@ test_pipeline = [
 
     dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
 
-    # dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
-
-    dict(type='ImageToTensor', keys=['merged']),
+    #dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
     dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
-
+    
+    dict(type='ImageToTensor', keys=['merged']),
     
     dict(
         type='Collect',
@@ -132,7 +137,6 @@ test_pipeline = [
         ]),
     
     dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed']),
-    # dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed', 'merged']),
 
 ]
 
@@ -143,12 +147,12 @@ data = dict(
     drop_last=False,
     train=dict(
         type=dataset_type,
-        ann_file=data_root + 'adobe_restimate_train.json',
+        ann_file=data_root + 'list/adobe_train.json',
         data_prefix=data_root,
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        ann_file=data_root + 'adobe/adobe_val.json',
+        ann_file=data_root + 'list/adobe_val.json',
         data_prefix=data_root,
         pipeline=test_pipeline),
     test=dict(
@@ -158,21 +162,22 @@ data = dict(
         pipeline=test_pipeline))
 
 # optimizer
-# optimizers_cfg = dict(type='Adam', lr=1e-5, momentun=0.9, weight_decay=0.0001)
-# paramwise_cfg_1 = dict(custom_keys={'conv': dict(lr_mult=1, decay_mult=50), 'bn': dict(lr_mult=1, decay_mult=0.1})
-# paramwise_cfg_2 = dict(custom_keys={)})
+# optimizers = dict(type='Adam', lr=0.00001)
 
 optimizers = dict(
     constructor='DefaultOptimizerConstructor',
     type='Adam',
     lr=1e-5,
+    #momentum=0.9,
     weight_decay=0.0001,
+    # optimizer_cfg=dict(type='Adam', momentum=0.9),
     paramwise_cfg=dict(custom_keys={'conv':dict(lr_mult=1, decay_mult=50), 'bn':dict(lr_mult=1, decay_mult=0.1)})
     )
 
 # learning policy
-#lr_config = dict(policy='Fixed')
-lr_config = dict(policy='Step', step=[40], gamma=0.1, by_epoch=True)
+lr_config = dict(policy='Fixed')
+
+
 
 # checkpoint saving
 checkpoint_config = dict(interval=40000, by_epoch=False)
@@ -188,7 +193,7 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 2000000
+total_iters = 1000000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'

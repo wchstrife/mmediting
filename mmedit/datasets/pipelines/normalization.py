@@ -107,11 +107,12 @@ class GroupNoraliseImage(object):
         std (np.ndarray): Std values of different channels.
     """
 
-    def __init__(self, keys, mean, std, format):
+    def __init__(self, keys, mean, std, format,to_rgb=False):
         self.keys = keys
         self.mean = np.array(mean, dtype=np.float32)
         self.std = np.array(std, dtype=np.float32)
         self.format = format
+        self.to_rgb = to_rgb
 
     def __call__(self, results):
         """Call function.
@@ -125,20 +126,16 @@ class GroupNoraliseImage(object):
         """
 
         for key in self.keys:
-            img = results[key].clone()
-            # img = img[None, :, :, :].float()
-            # img.cpu().numpy().tofile('/home2/wangchenhao/mmediting/dat/before_norm.dat')
+            img = results[key].clone() #copy().astype(np.float32)
             if (format == 'hwc'):
                 for i in range(3):
                     img[..., i] = (img[..., i] - self.mean[i]) / self.std[i]
             else:
                 for i in range(3):
                     img[..., i, :, :] = (img[..., i, :, :] - self.mean[i]) / self.std[i]
-            # img.cpu().numpy().tofile('/home2/wangchenhao/mmediting/dat/after_norm.dat')
-            # img = img.squeeze()
             results[key] = img
 
-        results['img_norm_cfg'] = dict(
+        results['img_norm_cfg_test'] = dict(
             mean=self.mean, std=self.std)
         return results
 
