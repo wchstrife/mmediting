@@ -69,7 +69,7 @@ train_pipeline = [
     dict(
         type='RescaleToZeroOne',
         keys=['merged', 'alpha', 'ori_merged', 'fg', 'bg', 'trimap']),
-    dict(type='Normalize', keys=['merge'], **img_norm_cfg),
+    dict(type='Normalize', keys=['merged'], **img_norm_cfg),
 
     dict(type='FormatTrimap2Channel', key='trimap'), # results['trimap_1channel']
     dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
