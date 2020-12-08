@@ -78,7 +78,6 @@ class FBA(BaseMattor):
     # TODO: 添加训练代码
     def forward_train(self, merged, trimap, meta, alpha, ori_merged, fg, bg, trimap_transformed, trimap_1channel):
 
-        cv2.imwrite('data/Adobe/test.png', merged*255.0)
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
         pred_alpha = result[..., 0:1, :, :]
         pred_fg = result[..., 1:4, :, :]
