@@ -99,8 +99,8 @@ class FBA(BaseMattor):
             losses['loss_f_l1'] = self.loss_f_l1(pred_fg, fg)       # 整张图计算
         if self.loss_b_l1 is not None:
             losses['loss_b_l1'] = self.loss_b_l1(pred_bg, bg)       # 整张图计算
-        # if self.loss_fb_excl is not None:
-        #     losses['loss_fb_excl'] = self.loss_fb_excl(pred_fg, pred_bg, weight)    
+        if self.loss_fb_excl is not None:
+            losses['loss_fb_excl'] = self.loss_fb_excl(pred_fg, pred_bg, weight)    
         if self.loss_fb_comp is not None:
             losses['loss_fb_comp'] = self.loss_fb_comp(alpha, pred_fg, pred_bg, ori_merged, weight)
         if self.loss_f_lap is not None:
