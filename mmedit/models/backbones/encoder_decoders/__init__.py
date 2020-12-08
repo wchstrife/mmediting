@@ -11,6 +11,7 @@ from .simple_encoder_decoder import SimpleEncoderDecoder
 from .simple_share_encoder_decoder import SimpleShareEncoderDecoder
 from .two_stage_encoder_decoder import DeepFillEncoderDecoder
 from .fba_encoder_decoder import FBAEncoderDecoder
+from .indexnet_encoder_decoder_fg import IndexnetEncoderDecoderFG
 
 __all__ = [
     'GLEncoderDecoder', 'SimpleEncoderDecoder', 'VGG16', 'GLEncoder',
@@ -20,5 +21,5 @@ __all__ = [
     'DeepFillEncoder', 'DeepFillEncoderDecoder', 'DeepFillDecoder',
     'ContextualAttentionNeck', 'IndexedUpsample', 'IndexNetEncoder',
     'IndexNetDecoder', 'ResGCAEncoder', 'ResGCADecoder', 'SimpleShareEncoderDecoder',
-    'FBAEncoderDecoder'
+    'FBAEncoderDecoder', 'IndexnetEncoderDecoderFG'
 ]

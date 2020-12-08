@@ -141,6 +141,9 @@ data = dict(
     samples_per_gpu=1,
     workers_per_gpu=4,
     drop_last=False,
+    # validation
+    val_samples_per_gpu=1,
+    val_workers_per_gpu=4,
     train=dict(
         type=dataset_type,
         ann_file=data_root + 'adobe_restimate_train.json',
