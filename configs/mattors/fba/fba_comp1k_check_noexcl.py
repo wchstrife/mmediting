@@ -16,7 +16,7 @@ model = dict(
 
     loss_f_l1=dict(type='L1Loss', loss_weight=0.25),
     loss_b_l1=dict(type='L1Loss', loss_weight=0.25),
-    loss_fb_excl=dict(type='GradientExclusionLoss', loss_weight=0.25),
+    # loss_fb_excl=dict(type='GradientExclusionLoss', loss_weight=0.25),
     loss_fb_comp=dict(type='L1CompositionLoss', loss_weight=0.25),
     loss_f_lap=dict(type='LaplacianLoss', loss_weight=0.25, channel=3),
     loss_b_lap=dict(type='LaplacianLoss', loss_weight=0.25, channel=3)
