@@ -14,9 +14,13 @@ import torch
 
 # torch.save(state_dict, '/home/sensetime/work/mmediting/work_dirs/fba/model/resnet_50_GN_WS_rename.pth')
 
-model = torch.load('/home/sensetime/work/mmediting/work_dirs/fba/model/FBA_rename_pat.pth')
+model = torch.load('/home/sensetime/work/mmediting/work_dirs/fba/model/iter_840000.pth')
 
 temp = model.keys()
+
+meta = model['meta']
+state_dict = model['state_dict']
+optimizer = model['optimizer']
 
 for key in model.keys():
     print(key, model[key].size(), sep=" ")
