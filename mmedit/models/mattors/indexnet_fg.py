@@ -33,7 +33,9 @@ class IndexNetFG(BaseMattor):
                  loss_comp=None,
                  loss_f_l1=None,
                  loss_b_l1=None,
-                 loss_fb_comp=None
+                 loss_fb_comp=None,
+                 loss_f_lap=None,
+                 loss_b_lap=None
                  ):
         super(IndexNetFG, self).__init__(backbone, None, train_cfg, test_cfg,
                                        pretrained)
@@ -46,6 +48,8 @@ class IndexNetFG(BaseMattor):
         self.loss_f_l1 = (build_loss(loss_f_l1) if loss_f_l1 is not None else None)
         self.loss_b_l1 = (build_loss(loss_b_l1) if loss_b_l1 is not None else None)  
         self.loss_fb_comp = (build_loss(loss_fb_comp) if loss_fb_comp is not None else None)
+        self.loss_f_lap = (build_loss(loss_f_lap) if loss_f_lap is not None else None)
+        self.loss_b_lap = (build_loss(loss_b_lap) if loss_b_lap is not None else None) 
 
         # support fp16
         self.fp16_enabled = False
@@ -84,13 +88,17 @@ class IndexNetFG(BaseMattor):
             losses['loss_alpha'] = self.loss_alpha(pred_alpha, alpha, weight)
         if self.loss_comp is not None:
             losses['loss_comp'] = self.loss_comp(pred_alpha, fg, bg, ori_merged, weight)
+            
         if self.loss_f_l1 is not None:
             losses['loss_f_l1'] = self.loss_f_l1(pred_fg, fg, weight)     
         if self.loss_b_l1 is not None:
             losses['loss_b_l1'] = self.loss_b_l1(pred_bg, bg, weight) 
         if self.loss_fb_comp is not None:
             losses['loss_fb_comp'] = self.loss_fb_comp(alpha, pred_fg, pred_bg, ori_merged, weight)    
-
+        if self.loss_f_lap is not None:
+            losses['loss_f_lap'] = self.loss_f_lap(pred_fg, fg, weight)     
+        if self.loss_b_lap is not None:
+            losses['loss_b_lap'] = self.loss_b_lap(pred_bg, bg, weight)     
 
         return {'losses': losses, 'num_samples': merged.size(0)}
 
