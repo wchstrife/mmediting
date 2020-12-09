@@ -11,9 +11,9 @@ model = dict(
     loss_comp=dict(
         type='CharbonnierCompLoss', loss_weight=1.5, sample_wise=True),
 
-    loss_f_l1=dict(type='CharbonnierLoss', loss_weight=0.25, sample_wise=True),
-    loss_b_l1=dict(type='CharbonnierLoss', loss_weight=0.25,  sample_wise=True),
-    loss_fb_comp=dict(type='CharbonnierCompLoss', loss_weight=0.25, sample_wise=True),
+    loss_f_l1=dict(type='L1Loss', loss_weight=0.25, sample_wise=True),
+    loss_b_l1=dict(type='L1Loss', loss_weight=0.25,  sample_wise=True),
+    loss_fb_comp=dict(type='L1CompositionLoss', loss_weight=0.25, sample_wise=True),
     loss_f_lap=dict(type='LaplacianLoss', loss_weight=0.25, channel=3),
     loss_b_lap=dict(type='LaplacianLoss', loss_weight=0.25, channel=3),
 
