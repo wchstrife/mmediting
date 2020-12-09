@@ -153,5 +153,5 @@ dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/indexnet'
 load_from = None
-resume_from = 'work_dirs/indexnet/fg/iter_2600.pth'
+resume_from = ''#'work_dirs/indexnet/fg/iter_2600.pth'
 workflow = [('train', 1)]
