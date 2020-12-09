@@ -10,9 +10,9 @@ model = dict(
     loss_comp=dict(
         type='CharbonnierCompLoss', loss_weight=1.5, sample_wise=True),
 
-    loss_f_l1=dict(type='CharbonnierLoss', loss_weight=0.25, sample_wise=True),
-    loss_b_l1=dict(type='CharbonnierLoss', loss_weight=0.25,  sample_wise=True),
-    loss_fb_comp=dict(type='CharbonnierCompLoss', loss_weight=0.25, sample_wise=True),
+    loss_f_l1=dict(type='L1Loss', loss_weight=0.25, sample_wise=True),
+    loss_b_l1=dict(type='L1Loss', loss_weight=0.25,  sample_wise=True),
+    loss_fb_comp=dict(type='L1CompositionLoss', loss_weight=0.25, sample_wise=True),
 
     pretrained='work_dirs/indexnet/mobilenet_v2.pth')
 # model training and testing settings
@@ -104,7 +104,7 @@ data = dict(
     drop_last=True,
     train=dict(
         type=dataset_type,
-        ann_file=data_root + 'adobe_restimate_train_merged.json',
+        ann_file=data_root + 'adobe/adobe_train.json',
         data_prefix=data_root,
         pipeline=train_pipeline),
     # validation
