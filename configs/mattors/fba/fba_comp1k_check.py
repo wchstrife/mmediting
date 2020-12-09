@@ -146,6 +146,9 @@ data = dict(
         ann_file=data_root + 'adobe_restimate_train.json',
         data_prefix=data_root,
         pipeline=train_pipeline),
+    # validation
+    val_samples_per_gpu=1,
+    val_workers_per_gpu=4,
     val=dict(
         type=dataset_type,
         ann_file=data_root + 'adobe/adobe_val.json',
