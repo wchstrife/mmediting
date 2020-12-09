@@ -126,7 +126,7 @@ class IndexNetFG(BaseMattor):
         """
         result = self.backbone(torch.cat((merged, trimap), 1), ori_merged)
 
-        pred_alpha = result[..., 0:1, :, :].cpu().numpy().squeeze()
+        pred_alpha = result[..., 0:1, :, :].cpu().clone().numpy().squeeze()
         pred_alpha = self.restore_shape(pred_alpha, meta)
         eval_result = self.evaluate(pred_alpha, meta)
 
