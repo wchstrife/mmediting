@@ -8,7 +8,7 @@ model = dict(
     loss_alpha=dict(type='CharbonnierLoss', loss_weight=0.5, sample_wise=True),
     loss_comp=dict(
         type='CharbonnierCompLoss', loss_weight=1.5, sample_wise=True),
-    pretrained='open-mmlab://mmedit/mobilenet_v2')
+    pretrained='work_dirs/indexnet/mobilenet_v2.pth')
 # model training and testing settings
 train_cfg = dict(train_backbone=True)
 test_cfg = dict(metrics=['SAD', 'MSE', 'GRAD', 'CONN'])
