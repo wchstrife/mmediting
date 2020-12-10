@@ -1,5 +1,6 @@
 
 # model settings
+# 4GPU 训去掉fushion
 model = dict(
     type='FBA',
     backbone=dict(
@@ -178,8 +179,8 @@ optimizers = dict(
 lr_config = dict(policy='Step', step=[431000], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
-checkpoint_config = dict(interval=40000, by_epoch=False)
-evaluation = dict(interval=40000, save_image=False)
+checkpoint_config = dict(interval=10000, by_epoch=False)
+evaluation = dict(interval=10000, save_image=False)
 # yapf:disable
 log_config = dict(
     interval=10,
@@ -191,7 +192,7 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 2000000
+total_iters = 1000000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
