@@ -1,6 +1,7 @@
 
 # model settings
-# 4GPU 训去掉fushion
+# 1. 去掉fushion
+# 2. 单卡训练
 model = dict(
     type='FBA',
     backbone=dict(
@@ -176,11 +177,11 @@ optimizers = dict(
 
 # learning policy
 #lr_config = dict(policy='Fixed')
-lr_config = dict(policy='Step', step=[431000*4], gamma=0.1, by_epoch=False)
+lr_config = dict(policy='Step', step=[862000*2], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
-checkpoint_config = dict(interval=10000, by_epoch=False)
-evaluation = dict(interval=10000, save_image=False)
+checkpoint_config = dict(interval=40000, by_epoch=False)
+evaluation = dict(interval=40000, save_image=False)
 # yapf:disable
 log_config = dict(
     interval=10,
@@ -192,10 +193,10 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 1000000
+total_iters = 2000000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
-load_from = '' #'./work_dirs/fba/FBA_rename_pat.pth'
+load_from = None #'./work_dirs/fba/FBA_rename_pat.pth'
 resume_from = None
 workflow = [('train', 1)]
