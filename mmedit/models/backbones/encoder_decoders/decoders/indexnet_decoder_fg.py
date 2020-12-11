@@ -140,7 +140,7 @@ class IndexNetDecoderFG(nn.Module):
         B = torch.sigmoid(output[:, 4:7])
 
         # FBA Fusion
-        #alpha, F, B = fba_fusion(alpha, ori_img, F, B)
+        alpha, F, B = fba_fusion(alpha, ori_img, F, B)
 
         output = torch.cat((alpha, F, B), 1)
 
