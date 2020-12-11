@@ -145,10 +145,10 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 78000
+total_iters = 100000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/indexnet'
 load_from = None
-resume_from = None#'work_dirs/indexnet/fg/iter_2600.pth'
+resume_from = 'work_dirs/indexnet/fg/iter_78000.pth'
 workflow = [('train', 1)]
