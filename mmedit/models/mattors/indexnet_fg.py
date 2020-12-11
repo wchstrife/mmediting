@@ -51,6 +51,7 @@ class IndexNetFG(BaseMattor):
         self.loss_f_l1 = (build_loss(loss_f_l1) if loss_f_l1 is not None else None)
         self.loss_b_l1 = (build_loss(loss_b_l1) if loss_b_l1 is not None else None)  
         self.loss_fb_comp = (build_loss(loss_fb_comp) if loss_fb_comp is not None else None)
+        self.loss_fb_excl = (build_loss(loss_fb_excl) if loss_fb_excl is not None else None)
         self.loss_f_lap = (build_loss(loss_f_lap) if loss_f_lap is not None else None)
         self.loss_b_lap = (build_loss(loss_b_lap) if loss_b_lap is not None else None) 
 
