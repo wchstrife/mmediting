@@ -1,5 +1,6 @@
 
 # model settings
+# 4GPU 训去掉fushion
 model = dict(
     type='FBA',
     backbone=dict(
@@ -100,7 +101,7 @@ test_pipeline = [
     dict(
         type='LoadImageFromFile', 
         key='merged', 
-        channel_order='rgb',
+        #channel_order='rgb',
         save_original_img=True),    # ori_merged
 
     dict(type='CopyImage', key='trimap'),    # Copy a image for evaluate name: copy_trimap
@@ -118,10 +119,10 @@ test_pipeline = [
 
     dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
 
-    # dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
+    dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
 
-    dict(type='ImageToTensor', keys=['merged']),
-    dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
+    # dict(type='ImageToTensor', keys=['merged']),
+    # dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
 
     
     dict(
@@ -131,8 +132,8 @@ test_pipeline = [
             'merged_path', 'merged_ori_shape', 'ori_alpha', 'ori_trimap', 'copy_trimap'
         ]),
     
-    dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed']),
-    # dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed', 'merged']),
+    # dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed']),
+    dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed', 'merged']),
 
 ]
 
@@ -141,14 +142,14 @@ data = dict(
     samples_per_gpu=1,
     workers_per_gpu=4,
     drop_last=False,
-    # validation
-    val_samples_per_gpu=1,
-    val_workers_per_gpu=4,
     train=dict(
         type=dataset_type,
         ann_file=data_root + 'adobe_restimate_train.json',
         data_prefix=data_root,
         pipeline=train_pipeline),
+    # validation
+    val_samples_per_gpu=1,
+    val_workers_per_gpu=4,
     val=dict(
         type=dataset_type,
         ann_file=data_root + 'adobe/adobe_val.json',
@@ -175,11 +176,11 @@ optimizers = dict(
 
 # learning policy
 #lr_config = dict(policy='Fixed')
-lr_config = dict(policy='Step', step=[40], gamma=0.1, by_epoch=True)
+lr_config = dict(policy='Step', step=[431000], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
-checkpoint_config = dict(interval=40000, by_epoch=False)
-evaluation = dict(interval=40000, save_image=False)
+checkpoint_config = dict(interval=10000, by_epoch=False)
+evaluation = dict(interval=10000, save_image=False)
 # yapf:disable
 log_config = dict(
     interval=10,
@@ -191,7 +192,7 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 2000000
+total_iters = 1000000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'

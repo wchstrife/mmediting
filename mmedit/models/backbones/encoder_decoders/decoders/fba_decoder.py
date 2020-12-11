@@ -103,11 +103,12 @@ class FBADecoder(nn.Module):
         output = self.conv_up4(x)
 
         alpha = torch.clamp(output[:, 0][:, None], 0, 1)    # [B, 1, H, W]
+        #alpha = torch.sigmoid(output[:, 0][:, None])
         F = torch.sigmoid(output[:, 1:4])
         B = torch.sigmoid(output[:, 4:7])
 
         # FBA Fusion
-        alpha, F, B = fba_fusion(alpha, img, F, B)
+        #alpha, F, B = fba_fusion(alpha, img, F, B)
 
         output = torch.cat((alpha, F, B), 1)
 

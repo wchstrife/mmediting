@@ -16,7 +16,7 @@ model = dict(
 
     loss_f_l1=dict(type='L1Loss', loss_weight=0.25),
     loss_b_l1=dict(type='L1Loss', loss_weight=0.25),
-    loss_fb_excl=dict(type='GradientExclusionLoss', loss_weight=0.25),
+    # loss_fb_excl=dict(type='GradientExclusionLoss', loss_weight=0.25),
     loss_fb_comp=dict(type='L1CompositionLoss', loss_weight=0.25),
     loss_f_lap=dict(type='LaplacianLoss', loss_weight=0.25, channel=3),
     loss_b_lap=dict(type='LaplacianLoss', loss_weight=0.25, channel=3)
@@ -100,7 +100,7 @@ test_pipeline = [
     dict(
         type='LoadImageFromFile', 
         key='merged', 
-        channel_order='rgb',
+        #channel_order='rgb',
         save_original_img=True),    # ori_merged
 
     dict(type='CopyImage', key='trimap'),    # Copy a image for evaluate name: copy_trimap
@@ -118,10 +118,10 @@ test_pipeline = [
 
     dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
 
-    # dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
+    dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
 
-    dict(type='ImageToTensor', keys=['merged']),
-    dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
+    # dict(type='ImageToTensor', keys=['merged']),
+    # dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
 
     
     dict(
@@ -131,8 +131,8 @@ test_pipeline = [
             'merged_path', 'merged_ori_shape', 'ori_alpha', 'ori_trimap', 'copy_trimap'
         ]),
     
-    dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed']),
-    # dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed', 'merged']),
+    # dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed']),
+    dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed', 'merged']),
 
 ]
 
@@ -141,9 +141,6 @@ data = dict(
     samples_per_gpu=1,
     workers_per_gpu=4,
     drop_last=False,
-    # validation
-    val_samples_per_gpu=1,
-    val_workers_per_gpu=4,
     train=dict(
         type=dataset_type,
         ann_file=data_root + 'adobe_restimate_train.json',
