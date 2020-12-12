@@ -13,7 +13,7 @@ model = dict(
 
     loss_alpha_l1=dict(type='L1Loss', loss_weight=1),
     loss_alpha_comp=dict(type='L1CompositionLoss', loss_weight=1),
-    loss_alpha_grad=dict(type='GradientLoss', loss_weight=1),
+    #loss_alpha_grad=dict(type='GradientLoss', loss_weight=1),
     loss_alpha_lap=dict(type='LaplacianLoss', loss_weight=1),
 
     loss_f_l1=dict(type='L1Loss', loss_weight=0.25),
