@@ -10,7 +10,7 @@ model = dict(
 
     pretrained='work_dirs/fba/resnet_50_GN_WS_rename.pth',
 
-    loss_alpha_l1=dict(type='CharbonnierLoss', loss_weight=1, sample_wise=True),
+    loss_alpha_l1=dict(type='CharbonnierLoss', loss_weight=0.5, sample_wise=True),
     loss_alpha_comp=dict(type='CharbonnierCompLoss', loss_weight=1, sample_wise=True),
     #loss_alpha_grad=dict(type='GradientLoss', loss_weight=1),
     loss_alpha_lap=dict(type='LaplacianLoss', loss_weight=1),
