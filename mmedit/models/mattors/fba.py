@@ -155,14 +155,15 @@ class FBA(BaseMattor):
         Returns:
             np.ndarray: The reshaped predicted alpha.
         """
-  
+        result =  np.clip(result, 0, 1)
+        
         ori_h, ori_w = meta[0]['merged_ori_shape'][:2]
 
         result = cv2.resize(result[0].cpu().numpy().transpose(1, 2, 0), (ori_w, ori_h), cv2.INTER_LANCZOS4) 
 
         assert result.shape[:2] == (ori_h, ori_w)
 
-        result =  np.clip(result, 0, 1)
+        
 
         return result
 
