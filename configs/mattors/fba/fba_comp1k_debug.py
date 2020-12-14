@@ -44,16 +44,16 @@ train_pipeline = [
     #dict(type='LoadImageFromFile', key='bg'),
     #dict(type='LoadImageFromFile', key='merged', save_original_img=True),
 
-    dict(                       # 到时候换成更换后的FG
-        type='CompositeFg',
-        fg_dirs=[
-            data_root + 'Combined_Dataset/Training_set/Adobe-licensed images/fg',
-            data_root + 'Combined_Dataset/Training_set/Other/fg'
-        ],
-        alpha_dirs=[
-            data_root + 'Combined_Dataset/Training_set/Adobe-licensed images/alpha',
-            data_root + 'Combined_Dataset/Training_set/Other/alpha'
-        ]),    
+    # dict(                       # 到时候换成更换后的FG
+    #     type='CompositeFg',
+    #     fg_dirs=[
+    #         data_root + 'Combined_Dataset/Training_set/Adobe-licensed images/fg',
+    #         data_root + 'Combined_Dataset/Training_set/Other/fg'
+    #     ],
+    #     alpha_dirs=[
+    #         data_root + 'Combined_Dataset/Training_set/Adobe-licensed images/alpha',
+    #         data_root + 'Combined_Dataset/Training_set/Other/alpha'
+    #     ]),    
 
     dict(type='Flip', keys=['alpha', 'fg', 'bg']),
     dict(type='RandomJitter'),  # 只针对fg
@@ -125,9 +125,8 @@ test_pipeline = [
     dict(type='FormatTrimap6Channel', key='trimap'), # results['trimap_transformed']
 
     #dict(type='Normalize', keys=['merged'], **img_norm_cfg),   # TODO: 删除自己实现的额GN，用统一的形式
-    dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
-    
     dict(type='ImageToTensor', keys=['merged']),
+    dict(type='GroupNoraliseImage', keys=['merged'], **img_norm_cfg_test),
     
     dict(
         type='Collect',

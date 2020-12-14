@@ -162,6 +162,8 @@ class FBA(BaseMattor):
 
         assert result.shape[:2] == (ori_h, ori_w)
 
+        result =  np.clip(result, 0, 1)
+
         return result
 
     def evaluate(self, pred_alpha, meta):
