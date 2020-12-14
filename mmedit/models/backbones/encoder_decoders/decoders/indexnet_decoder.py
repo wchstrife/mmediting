@@ -134,5 +134,5 @@ class IndexNetDecoder(nn.Module):
             out = decode_layer(out, shortcut, dec_idx_feat)
 
         out = self.pred(out)
-
+        
         return out
