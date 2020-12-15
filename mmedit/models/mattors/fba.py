@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import cv2
 import numpy as np
+import mmcv
 
 from ..builder import build_loss
 from ..registry import MODELS
@@ -162,7 +163,9 @@ class FBA(BaseMattor):
 
         ori_h, ori_w = meta[0]['merged_ori_shape'][:2]
 
-        result = cv2.resize(result[0].cpu().clone().numpy().transpose(1, 2, 0), (ori_w, ori_h), cv2.INTER_LANCZOS4) 
+        result = result[0]
+        result = cv2.resize(result.cpu().clone().numpy().transpose(1, 2, 0), (ori_w, ori_h), cv2.INTER_LANCZOS4) 
+        #result = mmcv.imresize(result.cpu().clone().numpy().transpose(1, 2, 0), (ori_w, ori_h), 'lanczos')
 
         assert result.shape[:2] == (ori_h, ori_w)
 
