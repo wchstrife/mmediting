@@ -155,9 +155,9 @@ class FBA(BaseMattor):
         Returns:
             np.ndarray: The reshaped predicted alpha.
         """
-        alpha = torch.sigmoid(result[:, 0][:, None])
-        F = torch.sigmoid(result[:, 1:4])
-        B = torch.sigmoid(result[:, 4:7])
+        alpha = torch.clamp(result[:, 0][:, None], 0, 1)
+        F = result[:, 1:4]
+        B = result[:, 4:7]
         result = torch.cat((alpha, F, B), 1)
 
         ori_h, ori_w = meta[0]['merged_ori_shape'][:2]
