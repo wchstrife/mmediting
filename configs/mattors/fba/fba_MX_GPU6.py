@@ -180,11 +180,11 @@ optimizers = dict(
 
 # learning policy
 #lr_config = dict(policy='Fixed')
-lr_config = dict(policy='Step', step=[102700 * 40], gamma=0.1, by_epoch=False)
+lr_config = dict(policy='Step', step=[18000 * 40], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
-checkpoint_config = dict(interval=100000, by_epoch=False)
-evaluation = dict(interval=100000, save_image=False)
+checkpoint_config = dict(interval=18000, by_epoch=False)
+evaluation = dict(interval=18000, save_image=False)
 # yapf:disable
 log_config = dict(
     interval=10,
@@ -196,7 +196,7 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 102700*60
+total_iters = 18000*60
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
