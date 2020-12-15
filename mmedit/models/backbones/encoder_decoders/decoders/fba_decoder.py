@@ -118,6 +118,12 @@ class FBADecoder(nn.Module):
 
         # output = torch.cat((alpha, F, B), 1)
 
+        # alpha直接用conv的输出，F B过sigmoid
+        alpha = output[:, 0][:, None]
+        F = torch.sigmoid(output[:, 1:4])
+        B = torch.sigmoid(output[:, 4:7])
+        out = torch.cat((alpha, F, B), 1)
+
         return output
 
 def norm(dim, bn=False):
