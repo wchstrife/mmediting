@@ -122,8 +122,8 @@ class FBADecoder(nn.Module):
         alpha = output[:, 0][:, None]
         F = torch.sigmoid(output[:, 1:4])
         B = torch.sigmoid(output[:, 4:7])
-        out = torch.cat((alpha, F, B), 1)
-
+        output = torch.cat((alpha, F, B), 1)
+        
         return output
 
 def norm(dim, bn=False):
