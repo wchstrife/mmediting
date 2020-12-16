@@ -32,6 +32,7 @@ def single_gpu_test(model,
     if save_image and save_path is None:
         raise ValueError(
             "When 'save_image' is True, you should also set 'save_path'.")
+    torch.cuda.empty_cache()
     model.eval()
     results = []
     dataset = data_loader.dataset
