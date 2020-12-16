@@ -116,7 +116,7 @@ class FBA(BaseMattor):
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
 
-        result = self.restore_shape(result, meta) # TODO 验证restore前后的尺度，确定要不要重新设计下面的todo
+        result = self.restore_shape(result, meta) # TODO
 
         pred_alpha = result[:, :, 0]
         fg = result[:, :, 1:4]
