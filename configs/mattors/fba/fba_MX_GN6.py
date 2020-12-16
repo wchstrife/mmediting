@@ -199,6 +199,6 @@ total_iters = 18000*60
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
-load_from = '' #'./work_dirs/fba/FBA_rename_pat.pth'
-resume_from = None
+load_from = None #'./work_dirs/fba/FBA_rename_pat.pth'
+resume_from = 'work_dirs/fba/fba_GN6/iter_16000.pth'
 workflow = [('train', 1)]

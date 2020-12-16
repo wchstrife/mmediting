@@ -2,7 +2,7 @@
 # model
 # Adobe+Dist646 数据集测试
 # 训练集102700张图片
-# 每个GPU的BS=1
+# 6卡训，每个gpubatchsize=1
 model = dict(
     type='FBA',
     backbone=dict(
