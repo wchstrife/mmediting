@@ -182,8 +182,8 @@ optimizers = dict(
 lr_config = dict(policy='Step', step=[102700 * 40], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
-checkpoint_config = dict(interval=50, by_epoch=False)
-evaluation = dict(interval=50, save_image=False)
+checkpoint_config = dict(interval=20, by_epoch=False)
+evaluation = dict(interval=20, save_image=False)
 # yapf:disable
 log_config = dict(
     interval=10,

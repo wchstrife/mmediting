@@ -949,7 +949,7 @@ class ScaleInput(object):
             h1 = int(np.ceil(self.scale * h / 8) * 8)
             w1 = int(np.ceil(self.scale * w / 8) * 8)
             results[key] = cv2.resize(results[key], (w1, h1), interpolation = self.scale_type)
-
+            
         return results
 
     def __repr__(self):
