@@ -33,8 +33,6 @@ def single_gpu_test(model,
         raise ValueError(
             "When 'save_image' is True, you should also set 'save_path'.")
     model.eval()
-    torch.cuda.empty_cache()
-
     results = []
     dataset = data_loader.dataset
     prog_bar = mmcv.ProgressBar(len(dataset))
@@ -55,7 +53,6 @@ def single_gpu_test(model,
                 break
         for _ in range(batch_size):
             prog_bar.update()
-    torch.cuda.empty_cache()
     return results
 
 
@@ -92,6 +89,7 @@ def multi_gpu_test(model,
     if save_image and save_path is None:
         raise ValueError(
             "When 'save_image' is True, you should also set 'save_path'.")
+    torch.cuda.empty_cache()       
     model.eval()
     results = []
     dataset = data_loader.dataset
