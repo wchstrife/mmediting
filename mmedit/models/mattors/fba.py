@@ -126,7 +126,7 @@ class FBA(BaseMattor):
         pred_alpha[ori_trimap[:, :, 0] == 1] = 0
         pred_alpha[ori_trimap[:, :, 1] == 1] = 1
 
-        # fg[alpha == 1] = image_np[alpha == 1] # TODO: 需要返回fg和bg时，需要用到merge_np，也就是ori_merge，但是在这里的实现已经经过了插值，改变的话需要重写norm层保留下来原来的ori_merged
+        # fg[alpha == 1] = image_np[alpha == 1] # TODO
         # bg[alpha == 0] = image_np[alpha == 0] 
 
         # result = result.cpu().numpy().squeeze()
@@ -158,15 +158,11 @@ class FBA(BaseMattor):
         """
 
         #result = result.cpu().clone().numpy().squeeze()
-        result = result.cpu().numpy().squeeze()
-        alpha = np.clip(result[0:1], 0, 1)
-        F = result[1:4]
-        B = result[4:7]
-        result = np.concatenate((alpha, F, B), axis = 0)
+        result = result.cpu().numpy().squeeze().transpose(1, 2, 0)
+        result = np.clip(result, 0, 1)
 
         ori_h, ori_w = meta[0]['merged_ori_shape'][:2]
 
-        result = result.transpose(1, 2, 0)
         result = cv2.resize(result, (ori_w, ori_h), cv2.INTER_LANCZOS4) 
         #result = mmcv.imresize(result.cpu().clone().numpy().transpose(1, 2, 0), (ori_w, ori_h), 'lanczos')
 
