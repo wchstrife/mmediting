@@ -157,7 +157,8 @@ class FBA(BaseMattor):
             np.ndarray: The reshaped predicted alpha.
         """
 
-        result = result.cpu().clone().numpy().squeeze()
+        #result = result.cpu().clone().numpy().squeeze()
+        result = result.cpu().numpy().squeeze()
         alpha = np.clip(result[0:1], 0, 1)
         F = result[1:4]
         B = result[4:7]
