@@ -141,7 +141,7 @@ test_pipeline = [
 
 
 data = dict(
-    samples_per_gpu=6,
+    samples_per_gpu=5,
     workers_per_gpu=4,
     drop_last=False,
     train=dict(
@@ -178,11 +178,11 @@ optimizers = dict(
 
 # learning policy
 #lr_config = dict(policy='Fixed')
-lr_config = dict(policy='Step', step=[7180 * 40], gamma=0.1, by_epoch=False)
+lr_config = dict(policy='Step', step=[10000 * 40], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
-checkpoint_config = dict(interval=8000, by_epoch=False)
-evaluation = dict(interval=8000, save_image=False)
+checkpoint_config = dict(interval=10000, by_epoch=False)
+evaluation = dict(interval=10000, save_image=False)
 # yapf:disable
 log_config = dict(
     interval=10,
@@ -194,10 +194,10 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 7180*60
+total_iters = 10000*60
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
 load_from = '' #'./work_dirs/fba/FBA_rename_pat.pth'
-resume_from = 'work_dirs/fba/fba_GN6/iter_16000.pth'
+resume_from = 'work_dirs/fba/fba_GN6/iter_32000.pth'
 workflow = [('train', 1)]
