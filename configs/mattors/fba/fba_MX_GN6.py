@@ -142,7 +142,7 @@ test_pipeline = [
 
 
 data = dict(
-    samples_per_gpu=6,
+    samples_per_gpu=5,
     workers_per_gpu=4,
     drop_last=False,
     train=dict(
@@ -195,7 +195,7 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 18000*60
+total_iters = 18000*80
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
