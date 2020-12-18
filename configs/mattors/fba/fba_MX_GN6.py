@@ -1,7 +1,7 @@
 
 # model
 # Adobe+Dist646 数据集训练
-# 单卡GN=6
+# 单卡GN=4
 model = dict(
     type='FBA',
     backbone=dict(
@@ -142,7 +142,7 @@ test_pipeline = [
 
 
 data = dict(
-    samples_per_gpu=5,
+    samples_per_gpu=4,
     workers_per_gpu=4,
     drop_last=False,
     train=dict(
@@ -179,11 +179,11 @@ optimizers = dict(
 
 # learning policy
 #lr_config = dict(policy='Fixed')
-lr_config = dict(policy='Step', step=[18000 * 40], gamma=0.1, by_epoch=False)  # batchsize=6
+lr_config = dict(policy='Step', step=[25000 * 40], gamma=0.1, by_epoch=False)  # batchsize=6
 
 # checkpoint saving
-checkpoint_config = dict(interval=18000, by_epoch=False)
-evaluation = dict(interval=18000, save_image=False)
+checkpoint_config = dict(interval=25000, by_epoch=False)
+evaluation = dict(interval=25000, save_image=False)
 # yapf:disable
 log_config = dict(
     interval=10,
@@ -195,7 +195,7 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 18000*80
+total_iters = 25000*80
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'

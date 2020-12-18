@@ -3,6 +3,7 @@
 # 去掉fushion
 # 去掉训练时候最后的激活函数
 # 单卡训练,batchsize=6
+# 由于在验证集上测试指标会爆显存，这里训练过程中不验证指标
 model = dict(
     type='FBA',
     backbone=dict(
@@ -141,7 +142,7 @@ test_pipeline = [
 
 
 data = dict(
-    samples_per_gpu=5,
+    samples_per_gpu=6,
     workers_per_gpu=4,
     drop_last=False,
     train=dict(
@@ -182,7 +183,7 @@ lr_config = dict(policy='Step', step=[10000 * 40], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
 checkpoint_config = dict(interval=10000, by_epoch=False)
-evaluation = dict(interval=10000, save_image=False)
+evaluation = dict(interval=10000*60, save_image=False)  # 只在最后验证结果
 # yapf:disable
 log_config = dict(
     interval=10,
@@ -199,5 +200,5 @@ dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
 load_from = '' #'./work_dirs/fba/FBA_rename_pat.pth'
-resume_from = 'work_dirs/fba/fba_GN6/iter_32000.pth'
+resume_from = 'work_dirs/fba/fba_GN6/iter_60000.pth'
 workflow = [('train', 1)]
