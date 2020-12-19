@@ -200,5 +200,5 @@ dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
 load_from = None #'./work_dirs/fba/FBA_rename_pat.pth'
-resume_from = 'work_dirs/fba/mx-gn6-gpu1/iter_54000.pth'
+resume_from = 'work_dirs/fba/mx-gn6-gpu1/iter_125000.pth'
 workflow = [('train', 1)]
