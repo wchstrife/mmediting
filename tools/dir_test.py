@@ -117,7 +117,7 @@ def main():
             if rank == 0:
                 # print metrics
                 stats = dataset.evaluate(outputs)
-                write_file = open(os.path.join(args.checkpoint_dir, 'eval_result.txt'), 'a') 
+                write_file = open(os.path.join(args.checkpoint_dir, 'eval_result_new.txt'), 'a') 
                 for stat in stats:
                     print('{}: Eval-{}: {}'.format(checkpoint, stat, stats[stat]))
                     write_file.write('{}: Eval-{}: {} '.format(checkpoint, stat, stats[stat]))
