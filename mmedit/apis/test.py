@@ -107,8 +107,7 @@ def multi_gpu_test(model,
                 iteration=iteration,
                 **data)
         results.append(result)
-        torch.cuda.empty_cache()
-
+        
         if rank == 0:
             # get batch size
             for _, v in data.items():
@@ -117,6 +116,7 @@ def multi_gpu_test(model,
                     break
             for _ in range(batch_size * world_size):
                 prog_bar.update()
+    torch.cuda.empty_cache()
     # collect results from all ranks
     if gpu_collect:
         results = collect_results_gpu(results, len(dataset))

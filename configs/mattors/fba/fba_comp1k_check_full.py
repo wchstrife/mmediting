@@ -177,14 +177,14 @@ optimizers = dict(
 
 # learning policy
 #lr_config = dict(policy='Fixed')
-lr_config = dict(policy='Step', step=[862000*2], gamma=0.1, by_epoch=False)
+lr_config = dict(policy='Step', step=[43100*60], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
 checkpoint_config = dict(interval=40000, by_epoch=False)
 evaluation = dict(interval=40000, save_image=False)
 # yapf:disable
 log_config = dict(
-    interval=10,
+    interval=100,
     hooks=[
         dict(type='TextLoggerHook', by_epoch=False),
         # dict(type='TensorboardLoggerHook'),
@@ -193,10 +193,10 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 2000000
+total_iters = 43100*100
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
 load_from = None #'./work_dirs/fba/FBA_rename_pat.pth'
-resume_from = None
+resume_from = 'work_dirs/fba/train-full/iter_2000000.pth'
 workflow = [('train', 1)]
