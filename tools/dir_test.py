@@ -47,47 +47,50 @@ def parse_args():
 def main():
     args = parse_args()
 
-    cfg = mmcv.Config.fromfile(args.config)
-    # set cudnn_benchmark
-    if cfg.get('cudnn_benchmark', False):
-        torch.backends.cudnn.benchmark = True
-    cfg.model.pretrained = None
-
-    # init distributed env first, since logger depends on the dist info.
-    if args.launcher == 'none':
-        distributed = False
-    else:
-        distributed = True
-        init_dist(args.launcher, **cfg.dist_params)
-
-    rank, _ = get_dist_info()
-
-    # set random seeds
-    if args.seed is not None:
-        if rank == 0:
-            print('set random seed to', args.seed)
-        set_random_seed(args.seed, deterministic=args.deterministic)
-
-    # build the dataloader
-    # TODO: support multiple images per gpu (only minor changes are needed)
-    dataset = build_dataset(cfg.data.test)
-    data_loader = build_dataloader(
-        dataset,
-        samples_per_gpu=1,
-        workers_per_gpu=cfg.data.get('val_workers_per_gpu',
-                                     cfg.data.workers_per_gpu),
-        dist=distributed,
-        shuffle=False)
-
-    # build the model and load checkpoint
-    model = build_model(cfg.model, train_cfg=None, test_cfg=cfg.test_cfg)
-
-    args.save_image = args.save_path is not None
-
     checkpoint_list = os.listdir(args.checkpoint_dir)
+
+    print(checkpoint_list)
 
     for checkpoint in checkpoint_list:
         if '.pth' in checkpoint:
+
+            cfg = mmcv.Config.fromfile(args.config)
+            # set cudnn_benchmark
+            if cfg.get('cudnn_benchmark', False):
+                torch.backends.cudnn.benchmark = True
+            cfg.model.pretrained = None
+
+            # init distributed env first, since logger depends on the dist info.
+            if args.launcher == 'none':
+                distributed = False
+            else:
+                distributed = True
+                init_dist(args.launcher, **cfg.dist_params)
+
+            rank, _ = get_dist_info()
+
+            # set random seeds
+            if args.seed is not None:
+                if rank == 0:
+                    print('set random seed to', args.seed)
+                set_random_seed(args.seed, deterministic=args.deterministic)
+
+            # build the dataloader
+            # TODO: support multiple images per gpu (only minor changes are needed)
+            dataset = build_dataset(cfg.data.test)
+            data_loader = build_dataloader(
+                dataset,
+                samples_per_gpu=1,
+                workers_per_gpu=cfg.data.get('val_workers_per_gpu',
+                                            cfg.data.workers_per_gpu),
+                dist=distributed,
+                shuffle=False)
+
+            # build the model and load checkpoint
+            model = build_model(cfg.model, train_cfg=None, test_cfg=cfg.test_cfg)
+
+            args.save_image = args.save_path is not None
+
             # distributed test
             find_unused_parameters = cfg.get('find_unused_parameters', False)
             model = DistributedDataParallelWrapper(
@@ -97,10 +100,12 @@ def main():
                 find_unused_parameters=find_unused_parameters)
 
             device_id = torch.cuda.current_device()
+
             _ = load_checkpoint(
                 model,
                 os.path.join(args.checkpoint_dir, checkpoint),
                 map_location=lambda storage, loc: storage.cuda(device_id))
+
             outputs = multi_gpu_test(
                 model,
                 data_loader,
