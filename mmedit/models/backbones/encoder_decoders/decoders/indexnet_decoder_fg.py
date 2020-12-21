@@ -135,7 +135,8 @@ class IndexNetDecoderFG(nn.Module):
 
         output = self.pred(out)
 
-        alpha = torch.clamp(output[:, 0][:, None], 0, 1)    # [B, 1, H, W]
+        #alpha = torch.clamp(output[:, 0][:, None], 0, 1)    # [B, 1, H, W]
+        alpha = output[:, 0][:, None]
         F = torch.sigmoid(output[:, 1:4])
         B = torch.sigmoid(output[:, 4:7])
 
