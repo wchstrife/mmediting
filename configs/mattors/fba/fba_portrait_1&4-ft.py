@@ -177,11 +177,11 @@ optimizers = dict(
 
 # learning policy
 #lr_config = dict(policy='Fixed')
-lr_config = dict(policy='Step', step=[102700 * 10], gamma=0.1, by_epoch=False)
+lr_config = dict(policy='Step', step=[64000 * 8], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
-checkpoint_config = dict(interval=100, by_epoch=False)
-evaluation = dict(interval=100, save_image=False)
+checkpoint_config = dict(interval=16000, by_epoch=False)
+evaluation = dict(interval=16000, save_image=False)
 # yapf:disable
 log_config = dict(
     interval=10,
@@ -193,10 +193,10 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 102700*40
+total_iters = 64000*20
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
-load_from = 'work_dirs/fba/train-nofushion/iter_950000.pth'     # best model
+load_from = 'work_dirs/fba/mx-gn1-gpu6/iter_738000.pth'     # best model
 resume_from = None
 workflow = [('train', 1)]
