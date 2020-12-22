@@ -140,7 +140,7 @@ test_pipeline = [
 
 
 data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=1,
     workers_per_gpu=4,
     drop_last=False,
     train=dict(
@@ -177,7 +177,7 @@ optimizers = dict(
 
 # learning policy
 #lr_config = dict(policy='Fixed')
-lr_config = dict(policy='Step', step=[64000 * 8], gamma=0.1, by_epoch=False)
+lr_config = dict(policy='Step', step=[64000 * 10], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
 checkpoint_config = dict(interval=16000, by_epoch=False)
