@@ -45,12 +45,12 @@ train_pipeline = [
     dict(                       # 到时候换成更换后的FG
         type='CompositeFg',
         fg_dirs=[
-            '/mnt/lustre/wangchenhao/code/gitlab/mmediting/data/adobe_train_fg_restimate',
-            '/mnt/lustre/share/3darseg/segmentation/matting/Distinctions-646/fg-restimate/dist_train'
+            '/mnt/lustre/share/3darseg/segmentation/matting/st_portrait/fg_restimate',
+            '/mnt/lustre/share/3darseg/segmentation/matting/st_portrait_2/st_portrait_2_fg_restimate'
         ],
         alpha_dirs=[
-            '/mnt/lustre/wangchenhao/code/gitlab/mmediting/data/adobe_train_alpha',
-            '/mnt/lustre/share/3darseg/segmentation/matting/Distinctions-646/Distinctions-646/Train/GT'
+            '/mnt/lustre/share/3darseg/segmentation/matting/st_portrait/alpha',
+            '/mnt/lustre/share/3darseg/segmentation/matting/st_portrait_2/st_portrait_2_alpha'
         ]),    
 
     dict(type='Flip', keys=['alpha', 'fg', 'bg']),
@@ -140,7 +140,7 @@ test_pipeline = [
 
 
 data = dict(
-    samples_per_gpu=1,
+    samples_per_gpu=2,
     workers_per_gpu=4,
     drop_last=False,
     train=dict(
