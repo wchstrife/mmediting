@@ -110,7 +110,7 @@ test_pipeline = [
 ]
 data = dict(
     # train
-    samples_per_gpu=16,
+    samples_per_gpu=4,
     workers_per_gpu=4,
     drop_last=True,
     train=dict(
