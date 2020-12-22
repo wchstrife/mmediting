@@ -1,5 +1,5 @@
 # model
-# 在之前最优的模型上，在Adobe+Dist646 数据集上finetune
+# 在之前最优的模型上，在Adobe+Dist646 数据集上finetune,使用高分辨率
 # 4卡训练
 # 
 model = dict(
@@ -62,11 +62,11 @@ train_pipeline = [
     dict(
         type='CropAroundUnknown',
         keys=['alpha', 'merged', 'ori_merged', 'fg', 'bg'],
-        crop_sizes=[320, 480, 640]),
+        crop_sizes=[512, 640, 720]),
     dict(
         type='Resize',
         keys=['alpha', 'merged', 'ori_merged', 'fg', 'bg'],
-        scale=(320, 320),
+        scale=(512, 512),
         keep_ratio=False),
     dict(type='GenerateTrimap', kernel_size=(3, 25)),
 
@@ -195,10 +195,10 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 102700*40
+total_iters = 102700*30
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
-load_from = 'work_dirs/fba/train-nofushion/iter_950000.pth'     # best model
+load_from = 'work_dirs/fba/mx-gn1-gpu6/iter_828000.pth'     # best model
 resume_from = None
 workflow = [('train', 1)]

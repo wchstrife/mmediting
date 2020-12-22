@@ -140,7 +140,7 @@ test_pipeline = [
 
 
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=4,
     workers_per_gpu=4,
     drop_last=False,
     train=dict(
@@ -197,6 +197,6 @@ total_iters = 64000*20
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
-load_from = 'work_dirs/fba/mx-gn1-gpu6/iter_738000.pth'     # best model
+load_from = 'work_dirs/fba/mx-gn1-gpu6/iter_828000.pth'     # best model
 resume_from = None
 workflow = [('train', 1)]
