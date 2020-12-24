@@ -194,10 +194,10 @@ log_config = dict(
 # yapf:enable
 
 # runtime settings
-total_iters = 2000000
+total_iters = 3000000
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
-load_from = '' #'./work_dirs/fba/FBA_rename_pat.pth'
-resume_from = None
+load_from = None #'./work_dirs/fba/FBA_rename_pat.pth'
+resume_from = 'work_dirs/fba/fba-nofus-noact/iter_2000000.pth'
 workflow = [('train', 1)]
