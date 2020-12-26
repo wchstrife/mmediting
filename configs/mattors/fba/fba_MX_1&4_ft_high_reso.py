@@ -200,5 +200,5 @@ dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
 load_from = 'work_dirs/fba/mx-gn1-gpu6/iter_828000.pth'     # best model
-resume_from = 'work_dirs/fba/mx-hr/iter_75000.pth'
+resume_from = 'work_dirs/fba/mx-hr/iter_150000.pth'
 workflow = [('train', 1)]
