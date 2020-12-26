@@ -183,7 +183,7 @@ lr_config = dict(policy='Step', step=[102700 * 10], gamma=0.1, by_epoch=False)
 
 # checkpoint saving
 checkpoint_config = dict(interval=100000//4, by_epoch=False)
-evaluation = dict(interval=100000//4, save_image=False)
+evaluation = dict(interval=102700*30, save_image=False)
 # yapf:disable
 log_config = dict(
     interval=10,
