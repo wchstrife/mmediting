@@ -41,5 +41,5 @@ def format_triamp(trimap_dir, save_dir):
             print(trimap_name)
 
 if __name__ == "__main__":
-    check_trimap('data/portrait/trimaps-fix')
+    check_trimap('data/portrait/trimaps')
     #format_triamp('data/portrait/trimaps', 'data/portrait/trimaps-fix')

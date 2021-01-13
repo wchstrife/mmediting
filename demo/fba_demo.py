@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument('save_path', help='path to save alpha matte result')
     parser.add_argument(
         '--imshow', action='store_true', help='whether show image with opencv')
-    parser.add_argument('--device', type=int, default=2, help='CUDA device id')
+    parser.add_argument('--device', type=int, default=1, help='CUDA device id')
     args = parser.parse_args()
     return args
 
@@ -33,8 +33,8 @@ def main():
 
         pred_alpha, perd_fg, pred_bg = fba_inference(model, os.path.join(args.img_path, img) , os.path.join(args.trimap_path, img))
 
-        mmcv.imwrite(pred_alpha * 255, os.path.join('data/train-test/alpha', img))
-        mmcv.imwrite(perd_fg * 255, os.path.join('data/train-test/fg', img))
+        mmcv.imwrite(pred_alpha * 255, os.path.join('data/portrait/results/debug-nograd-noexcel/alpha', img))
+        mmcv.imwrite(perd_fg * 255, os.path.join('data/portrait/results/debug-nograd-noexcel/fg', img))
         # mmcv.imwrite(pred_bg * 255, os.path.join('data/portrait/results/debug-portrait-only/bg', img))
 
 
