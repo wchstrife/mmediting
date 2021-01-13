@@ -112,23 +112,36 @@ class FBA(BaseMattor):
 
         return {'losses': losses, 'num_samples': merged.size(0)}            
 
-    def forward_test(self, merged, trimap, meta, ori_merged, trimap_transformed, save_image=False, save_path=None, iteration=None):
+    def forward_test(self, merged, trimap, meta, ori_merged, trimap_transformed, save_image=False, save_path=None, iteration=None, fg_flag=False):
 
         result = self.backbone(ori_merged, trimap, merged, trimap_transformed)
 
         result = self.restore_shape(result, meta) # TODO
 
         pred_alpha = result[:, :, 0]
-        fg = result[:, :, 1:4]
-        bg = result[:, :, 4:7]
+        pred_fg = result[:, :, 1:4]
+        pred_bg = result[:, :, 4:7]
 
         ori_trimap = meta[0]['ori_trimap'].squeeze()
         pred_alpha[ori_trimap[:, :, 0] == 1] = 0
         pred_alpha[ori_trimap[:, :, 1] == 1] = 1
 
-        # fg[alpha == 1] = image_np[alpha == 1] # TODO
-        # bg[alpha == 0] = image_np[alpha == 0] 
+        # 恢复原来的fg
+        ori_merged = ori_merged.cpu().numpy().squeeze().transpose(1, 2, 0)
 
+        print(pred_alpha.shape)
+        print(ori_merged.shape)
+
+        if pred_alpha.shape[0] != ori_merged.shape[0] or pred_alpha.shape[1] != ori_merged.shape[1]:
+            ori_merged = cv2.resize(ori_merged, (pred_alpha.shape[1], pred_alpha.shape[0]), cv2.INTER_LANCZOS4) 
+
+        #pred_fg = pred_fg[:, :, ::-1]
+        #ori_merged = ori_merged[:, :, ::-1]
+        pred_fg[pred_alpha == 1] = ori_merged[pred_alpha == 1] # TODO
+        pred_bg[pred_alpha == 0] = ori_merged[pred_alpha == 0] 
+
+        # mmcv.imwrite(pred_fg*255.0, 'data/test/result/ori_fg.png')
+        # mmcv.imwrite(pred_bg*255.0, 'data/test/result/ori_bg.png')
         # result = result.cpu().numpy().squeeze()
         # trimap = trimap.cpu().numpy().squeeze()
         
@@ -138,8 +151,10 @@ class FBA(BaseMattor):
         if save_image:
             self.save_image(pred_alpha, meta, save_path, iteration)
 
-        return {'pred_alpha': pred_alpha, 'eval_result': eval_result}
-
+        if fg_flag:
+            return {'pred_alpha': pred_alpha, 'eval_result': eval_result, 'pred_fg': pred_fg, 'pred_bg': pred_bg}
+        else:
+            return {'pred_alpha': pred_alpha, 'eval_result': eval_result}
         
     def restore_shape(self, result, meta):
         """Restore the result to the original shape.

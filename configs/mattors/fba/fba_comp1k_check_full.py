@@ -29,7 +29,7 @@ test_cfg = dict(metrics=['SAD', 'MSE', 'GRAD', 'CONN'])
 
 # dataset settings
 dataset_type = 'AdobeComp1kDataset'
-data_root = '/mnt/lustre/share/3darseg/segmentation/matting/'
+data_root = '/data/wangchenhao/Code/mmediting/'
 img_norm_cfg = dict(
     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], to_rgb=True)
 
@@ -42,17 +42,17 @@ train_pipeline = [
     dict(type='LoadImageFromFile', key='bg'),
     #dict(type='LoadImageFromFile', key='merged', save_original_img=True),
 
-    dict(                       # 到时候换成更换后的FG
-        type='CompositeFg',
-        fg_dirs=[
-            '/mnt/lustre/wangchenhao/code/gitlab/mmediting/data/adobe_train_fg_restimate'
-        ],
-        alpha_dirs=[
-            '/mnt/lustre/wangchenhao/code/gitlab/mmediting/data/adobe_train_alpha'
-        ]),    
+    # dict(                       # 到时候换成更换后的FG
+    #     type='CompositeFg',
+    #     fg_dirs=[
+    #         '/mnt/lustre/wangchenhao/code/gitlab/mmediting/data/adobe_train_fg_restimate'
+    #     ],
+    #     alpha_dirs=[
+    #         '/mnt/lustre/wangchenhao/code/gitlab/mmediting/data/adobe_train_alpha'
+    #     ]),    
 
     dict(type='Flip', keys=['alpha', 'fg', 'bg']),
-    dict(type='RandomJitter'),  # 只针对fg
+    dict(type='RandomJitter'),  # 只针对fg,只能是对BGR顺序
     dict(type='RandomGamma',keys=['fg', 'bg']),
 
     dict(type='MergeFgAndBg'),  # results['ori_merged']
@@ -133,8 +133,8 @@ test_pipeline = [
             'merged_path', 'merged_ori_shape', 'ori_alpha', 'ori_trimap', 'copy_trimap'
         ]),
     
-    # dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed']),
-    dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed', 'merged']),
+    #dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed']),
+    dict(type='ImageToTensor', keys=['ori_merged','trimap', 'trimap_transformed', 'merged'])
 
 ]
 
@@ -145,7 +145,7 @@ data = dict(
     drop_last=False,
     train=dict(
         type=dataset_type,
-        ann_file=data_root + 'adobe_restimate_train.json',
+        ann_file=data_root + 'data/train-test/train.json',
         data_prefix=data_root,
         pipeline=train_pipeline),
     # validation
@@ -153,12 +153,12 @@ data = dict(
     val_workers_per_gpu=4,
     val=dict(
         type=dataset_type,
-        ann_file=data_root + 'adobe/adobe_val.json',
+        ann_file=data_root + 'data/train-test/train.json',
         data_prefix=data_root,
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'adobe/adobe_val.json',
+        ann_file=data_root + 'data/train-test/train.json',
         data_prefix=data_root,
         pipeline=test_pipeline))
 
@@ -198,5 +198,5 @@ dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/fba/train'
 load_from = None #'./work_dirs/fba/FBA_rename_pat.pth'
-resume_from = 'work_dirs/fba/train-full/iter_2000000.pth'
+resume_from = None
 workflow = [('train', 1)]

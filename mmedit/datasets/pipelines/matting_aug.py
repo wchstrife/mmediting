@@ -39,7 +39,12 @@ class MergeFgAndBg(object):
         bg = results['bg']
         merged = fg * alpha + (1. - alpha) * bg
         results['merged'] = merged
-        results['ori_merged'] = merged
+        results['ori_merged'] = merged.copy()
+
+        ##Test
+        mmcv.imwrite(fg, 'data/train-test/aut_test/fg.png')
+        mmcv.imwrite(bg, 'data/train-test/aut_test/bg.png')
+        mmcv.imwrite(merged, 'data/train-test/aut_test/merged.png')
         return results
 
 
@@ -129,6 +134,13 @@ class GenerateTrimap(object):
         trimap[eroded >= 255] = 255
         trimap[dilated <= 0] = 0
         results['trimap'] = trimap.astype(np.float32)
+
+        # ## Test
+        # mmcv.imwrite(trimap, 'data/train-test/aut_test/trimap.png')
+        # mmcv.imwrite(results['merged'], 'data/train-test/aut_test/merged-resize.png')
+        # mmcv.imwrite(results['fg'], 'data/train-test/aut_test/fg-resize.png')
+        # mmcv.imwrite(results['bg'], 'data/train-test/aut_test/bg-resize.png')
+        # mmcv.imwrite(results['alpha'], 'data/train-test/aut_test/alpha-resize.png')
         return results
 
     def __repr__(self):

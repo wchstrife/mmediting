@@ -1,23 +1,22 @@
 import argparse
 import os
+
 import mmcv
 import torch
-from tqdm import tqdm
 
-
-from mmedit.apis import init_model, matting_inference
+from mmedit.apis import init_model, fba_inference
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Matting demo')
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
-    parser.add_argument('img_path', help='path to input image file')
-    parser.add_argument('trimap_path', help='path to input trimap file')
+    parser.add_argument('img_path', help='path to input image ')
+    parser.add_argument('trimap_path', help='path to input trimap ')
     parser.add_argument('save_path', help='path to save alpha matte result')
     parser.add_argument(
         '--imshow', action='store_true', help='whether show image with opencv')
-    parser.add_argument('--device', type=int, default=0, help='CUDA device id')
+    parser.add_argument('--device', type=int, default=2, help='CUDA device id')
     args = parser.parse_args()
     return args
 
@@ -30,11 +29,14 @@ def main():
 
     img_dir = os.listdir(args.img_path)
 
-    for img in tqdm(img_dir):
-        pred_alpha = matting_inference(model, os.path.join(args.img_path, img),
-                                   os.path.join(args.trimap_path, img)) * 255
+    for img in img_dir:
 
-        mmcv.imwrite(pred_alpha, os.path.join("data/GS_Video/results/ngs-iter_78000-SAD-7.081.pth/alpha", img))
+        pred_alpha, perd_fg, pred_bg = fba_inference(model, os.path.join(args.img_path, img) , os.path.join(args.trimap_path, img))
+
+        mmcv.imwrite(pred_alpha * 255, os.path.join('data/train-test/alpha', img))
+        mmcv.imwrite(perd_fg * 255, os.path.join('data/train-test/fg', img))
+        # mmcv.imwrite(pred_bg * 255, os.path.join('data/portrait/results/debug-portrait-only/bg', img))
+
 
 
 if __name__ == '__main__':

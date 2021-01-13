@@ -968,7 +968,7 @@ class RandomGamma(object):
             instead of gaussian noise. Defaults to 1.
     """
 
-    def __init__(self, keys, gamma_ratio=0):
+    def __init__(self, keys, gamma_ratio=1):
         if gamma_ratio < 0 or gamma_ratio > 1:
             raise ValueError('gamma_ratio must be a float between [0, 1], '
                              f'but got {gamma_ratio}')
@@ -989,9 +989,26 @@ class RandomGamma(object):
             # adjust gamma in a range of N(1, 0.12)
             gamma = np.random.normal(1, 0.12)
             for key in self.keys:
+                results[key] = results[key].astype(np.float32) / 255
                 results[key] = adjust_gamma(results[key], gamma)
+                results[key] = results[key] * 255
 
         return results
 
     def __repr__(self):
         return self.__class__.__name__ + f'(gamma_ratio={self.gamma_ratio})'
+
+@PIPELINES.register_module()
+class BGR2RGB(object):
+
+    def __init__(self, keys):
+        self.keys = keys
+
+    def __call__(self, results):
+        for key in self.keys:
+            results[key] = mmcv.bgr2rgb(results[key])
+
+        return results
+
+    def __repr__(self):
+        return self.__class__.__name__ + f'(BGR2RGB)'

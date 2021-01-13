@@ -1,10 +1,13 @@
 import torch
+import mmcv
 from mmcv.runner import auto_fp16
 
 from ..builder import build_loss
 from ..registry import MODELS
 from .base_mattor import BaseMattor
 from .utils import get_unknown_tensor
+
+import cv2
 
 
 @MODELS.register_module()
@@ -148,7 +151,21 @@ class IndexNetFG(BaseMattor):
         pred_alpha = self.restore_shape(pred_alpha, meta)
         eval_result = self.evaluate(pred_alpha, meta)
 
+        # 预测前景
+        pred_fg = result[..., 1:4, :, :].cpu().clone().numpy().squeeze().transpose(1, 2, 0)
+        ori_merged = ori_merged.cpu().clone().numpy().squeeze().transpose(1, 2, 0)
+
+        ori_h, ori_w = meta[0]['merged_ori_shape'][:2]
+
+        if pred_fg.shape[0] != ori_h or pred_fg.shape[1] != ori_w:
+            # pred_fg = cv2.resize(pred_fg, (ori_h, ori_w), cv2.INTER_LANCZOS4) 
+            # ori_merged = cv2.resize(ori_merged, (ori_h, ori_w), cv2.INTER_LANCZOS4)
+            pred_fg = mmcv.imresize(pred_fg, (ori_w, ori_h), interpolation=meta[0]['interpolation'])
+            ori_merged = mmcv.imresize(ori_merged, (ori_w, ori_h), interpolation=meta[0]['interpolation'])
+
+        pred_fg[pred_alpha == 1] = ori_merged[pred_alpha == 1] 
+
         if save_image:
             self.save_image(pred_alpha, meta, save_path, iteration)
 
-        return {'pred_alpha': pred_alpha, 'eval_result': eval_result}
+        return {'pred_alpha': pred_alpha, 'eval_result': eval_result,'pred_fg': pred_fg}

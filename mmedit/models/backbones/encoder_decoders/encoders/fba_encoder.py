@@ -137,7 +137,7 @@ class FBAEncoder(nn.Module):
         else:
             raise TypeError(f'"pretrained" must be a str or None.' f'But received {type(pretrained)}')
 
-    def forward(self, x, return_feature_maps=False):
+    def forward(self, x, return_feature_maps=True):
         return self.encoder(x, return_feature_maps)
 
 class ResnetDilatedBN(nn.Module):

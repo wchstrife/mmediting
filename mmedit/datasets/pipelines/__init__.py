@@ -1,7 +1,7 @@
 from .augmentation import (BinarizeImage, Flip, GenerateFrameIndices,
                            GenerateFrameIndiceswithPadding, Pad, RandomAffine,
                            RandomJitter, RandomMaskDilation, RandomTransposeHW,
-                           Resize, TemporalReverse, ScaleInput, ResizeForShorterSide)
+                           Resize, TemporalReverse, ScaleInput, ResizeForShorterSide, BGR2RGB)
 from .compose import Compose
 from .crop import (Crop, CropAroundCenter, CropAroundFg, CropAroundUnknown, CropBboxFromAlpha,
                    FixedCrop, ModCrop, PairedRandomCrop)
@@ -28,5 +28,5 @@ __all__ = [
     'CropAroundFg', 'GetSpatialDiscountMask', 'GenerateTrimapWithDistTransform',
     'ResizeForShorterSide', 'GenerateTrimapFromMask', 'GenerateMaskFromAlpha',
     'CropBboxFromAlpha', 'FormatTrimap2Channel', 'FormatTrimap6Channel',
-    'ScaleInput', 'GroupNoraliseImage', 'CopyImage'
+    'ScaleInput', 'GroupNoraliseImage', 'CopyImage', 'BGR2RGB'
 ]

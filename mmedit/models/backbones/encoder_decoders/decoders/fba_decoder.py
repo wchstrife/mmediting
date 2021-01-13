@@ -108,17 +108,17 @@ class FBADecoder(nn.Module):
         # temp3 = output[:, 4:7].cpu().numpy().squeeze()
 
 
-        # alpha = torch.clamp(output[:, 0][:, None], 0, 1)    # [B, 1, H, W]
-        # #alpha = torch.sigmoid(output[:, 0][:, None])
+        #alpha = torch.clamp(output[:, 0][:, None], 0, 1)    # [B, 1, H, W]
+        #alpha = torch.sigmoid(output[:, 0][:, None])
         # F = torch.sigmoid(output[:, 1:4])
         # B = torch.sigmoid(output[:, 4:7])
 
-        # # FBA Fusion
+        # #FBA Fusion
         # #alpha, F, B = fba_fusion(alpha, img, F, B)
 
         # output = torch.cat((alpha, F, B), 1)
 
-        # alpha直接用conv的输出，F B过sigmoid
+        #alpha直接用conv的输出，F B过sigmoid
         alpha = output[:, 0][:, None]
         F = torch.sigmoid(output[:, 1:4])
         B = torch.sigmoid(output[:, 4:7])
